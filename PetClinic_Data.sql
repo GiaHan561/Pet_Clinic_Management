@@ -6,23 +6,134 @@ INSERT INTO PET_TYPES (typeName, description)
 VALUES
 (N'Chó', N'Các giống chó nuôi trong gia đình'),
 (N'Mèo', N'Các giống mèo nuôi trong gia đình'),
-(N'Thỏ', N'Thỏ cảnh và thỏ thú cưng'),
+(N'Thỏ', N'Thỏ cảnh và thỏ thú cưng');
+
+INSERT INTO PET_TYPES (typeName, description) 
+VALUES
 (N'Chim', N'Các loài chim cảnh'),
 (N'Chuột Hamster', N'Các loại chuột cảnh');
 GO
 
+
+INSERT INTO DOCTORS (fullName, phone, email, licenseNumber, status) VALUES
+(N'BS. Phạm Quốc Dũng', '0938111222', 'dung.pham@petclinic.vn', 'GP-2015-0001', N'Active'),
+(N'BS. Võ Thu Hà',      '0938333444', 'ha.vo@petclinic.vn',     'GP-2018-0002', N'Active'),
+(N'BS. Đặng Hoàng Nam', '0938555666', 'nam.dang@petclinic.vn',  'GP-2020-0003', N'OnLeave');
+
+INSERT INTO DOCTORS (fullName, phone, email, licenseNumber, status) 
+VALUES
+(N'BS. Nguyễn Thanh Tùng','0938777888','tung.nguyen@petclinic.vn','GP-2021-0004', N'Active'),
+(N'BS. Lê Thị Mai',     '0938999000', 'mai.le@petclinic.vn',    'GP-2022-0005', N'Active');
+GO
+
+
+INSERT INTO DOCTOR_SPECIALIZATION (doctorID, specialization) 
+VALUES
+(1, N'Nội khoa'),
+(2, N'Ngoại khoa'),
+(3, N'Da liễu');
+
+INSERT INTO DOCTOR_SPECIALIZATION (doctorID, specialization) 
+VALUES
+(1, N'Chẩn đoán hình ảnh'),
+(2, N'Phẫu thuật'),
+(4, N'Nha khoa thú cưng'),
+(5, N'Dinh dưỡng & Tiêm phòng');
+GO
+
+
+INSERT INTO DOCTOR_SCHEDULE (doctorID, day_of_week, startTime, endTime) 
+VALUES
+(1, 2, '08:00', '12:00'),
+(2, 4, '13:00', '17:00'),
+(3, 7, '08:00', '16:00');
+
+INSERT INTO DOCTOR_SCHEDULE (doctorID, day_of_week, startTime, endTime) 
+VALUES
+(1, 3, '08:00', '12:00'),
+(2, 5, '13:00', '17:00'),
+(4, 6, '08:00', '17:00'),
+(5, 8, '08:00', '12:00');
+GO
+
+
+INSERT INTO SERVICES (serviceName, description, price, status) 
+VALUES
+(N'Khám tổng quát', N'Khám sức khỏe tổng quát cho thú cưng',   150000, N'Active'),
+(N'Tắm và vệ sinh', N'Tắm, sấy, cắt tỉa móng, vệ sinh tai',    120000, N'Active'),
+(N'Xét nghiệm máu', N'Xét nghiệm công thức máu và sinh hóa',   350000, N'Active');
+
+INSERT INTO SERVICES (serviceName, description, price, status) 
+VALUES
+(N'Siêu âm tổng quát', N'Siêu âm chẩn đoán hình ảnh ổ bụng',  250000, N'Active'),
+(N'Triệt sản', N'Phẫu thuật triệt sản an toàn',                800000, N'Active'),
+(N'Cạo vôi răng', N'Vệ sinh và cạo vôi răng siêu âm',          300000, N'Active');
+GO
+
+
+INSERT INTO VACCINE (name, manufacturer, description, price, rcmInterval) 
+VALUES
+(N'Vaccine 7 bệnh cho chó', N'Zoetis',      N'Phòng Care, Parvo, Viêm gan, Cúm...', 250000, 365),
+(N'Vaccine 4 bệnh cho mèo', N'Boehringer',  N'Phòng Rhinotracheitis, Calici, Panleukopenia', 280000, 365),
+(N'Vaccine dại',            N'Nobivac',     N'Phòng bệnh dại cho chó mèo',           150000, 365);
+
+INSERT INTO VACCINE (name, manufacturer, description, price, rcmInterval) 
+VALUES
+(N'Vaccine 5 bệnh cho chó', N'Vanguard',    N'Phòng các bệnh truyền nhiễm cơ bản',   200000, 365);
+GO
+
+
+INSERT INTO MEDICINE (name, genericName, description, unit, quantity, price, expiryDay) 
+VALUES
+(N'Cetirizine 10mg',  N'Cetirizine',    N'Thuốc kháng histamin',       N'Viên', 500,  5000, '2027-12-31'),
+(N'Amoxicillin 250mg',N'Amoxicillin',   N'Kháng sinh phổ rộng',        N'Viên', 800,  4000, '2027-08-30'),
+(N'Men tiêu hóa Pro', N'Probiotic',     N'Hỗ trợ hệ tiêu hóa',         N'Gói',  300,  8000, '2027-05-15');
+
+INSERT INTO MEDICINE (name, genericName, description, unit, quantity, price, expiryDay) 
+VALUES
+(N'Thuốc nhỏ mắt Tobra',N'Tobramycin',  N'Điều trị viêm kết mạc',      N'Chai', 150, 45000, '2026-11-20'),
+(N'Xịt trị rận Frontline',N'Fipronil',   N'Trị ve rận bọ chét',         N'Chai', 100,180000, '2028-01-10');
+GO
+
+
+INSERT INTO MEDICINE_CATEGORY (medicineID, category) 
+VALUES
+(1, N'Kháng histamin'),
+(2, N'Kháng sinh'),
+(3, N'Hỗ trợ tiêu hóa');
+
+INSERT INTO MEDICINE_CATEGORY (medicineID, category) 
+VALUES
+(4, N'Thuốc nhỏ mắt'),
+(5, N'Trị ký sinh trùng');
+GO
+
+
+INSERT INTO PAYMENT_METHOD (typeName, description) 
+VALUES
+(N'Tiền mặt',       N'Thanh toán trực tiếp tại quầy'),
+(N'Chuyển khoản',   N'Chuyển khoản ngân hàng'),
+(N'Thẻ tín dụng',   N'Thanh toán bằng thẻ Visa/Mastercard');
+GO
+
+
+-- Dữ liệu cũ
 INSERT INTO CUSTOMERS (fullName, phone, email, address) 
 VALUES
 (N'Nguyễn Văn An',  '0901234567', 'an.nguyen@gmail.com',  N'12 Nguyễn Huệ, Quận 1, TP.HCM'),
 (N'Trần Thị Bình',  '0912345678', 'binh.tran@gmail.com',  N'45 Lê Lợi, Quận 3, TP.HCM'),
-(N'Lê Minh Châu',   '0923456789', 'chau.le@gmail.com',    N'78 Điện Biên Phủ, Bình Thạnh, TP.HCM'),
+(N'Lê Minh Châu',   '0923456789', 'chau.le@gmail.com',    N'78 Điện Biên Phủ, Bình Thạnh, TP.HCM');
+
+-- Dữ liệu mới thêm vào
+INSERT INTO CUSTOMERS (fullName, phone, email, address) 
+VALUES
 (N'Phạm Hoàng Dung', '0934567890', 'dung.pham@gmail.com',  N'102 Trần Hưng Đạo, Quận 1, TP.HCM'),
 (N'Hoàng Ngọc Giang', '0945678901', 'giang.hoang@gmail.com', N'55 Hoàng Văn Thụ, Phú Nhuận, TP.HCM'),
 (N'Vũ Anh Hải',     '0956789012', 'hai.vu@gmail.com',     N'230 Cách Mạng Tháng 8, Quận 10, TP.HCM'),
 (N'Đỗ Thu Hương',   '0967890123', 'huong.do@gmail.com',   N'15 Nguyễn Trãi, Quận 5, TP.HCM'),
 (N'Ngô Bảo Khánh',  '0978901234', 'khanh.ngo@gmail.com',  N'88 Lý Thường Kiệt, Tân Bình, TP.HCM'),
 (N'Bùi Tuấn Lâm',   '0989012345', 'lam.bui@gmail.com',    N'40 Hai Bà Trưng, Quận 1, TP.HCM'),
-(N'Đặng Thanh Mai', '0990123456', 'mai.dang@gmail.com',   N'19 Phạn Văn Đồng, Thủ Đức, TP.HCM'),
+(N'Đặng Thanh Mai', '0990123456', 'mai.dang@gmail.com',   N'19 Phạm Văn Đồng, Thủ Đức, TP.HCM'),
 (N'Dương Quốc Nam', '0902345678', 'nam.duong@gmail.com',  N'67 Nguyễn Thị Minh Khai, Quận 3, TP.HCM'),
 (N'Lý Hồng Nhung',  '0913456789', 'nhung.ly@gmail.com',   N'124 Xô Viết Nghệ Tĩnh, Bình Thạnh, TP.HCM'),
 (N'Phan Văn Phúc',  '0924567890', 'phuc.phan@gmail.com',  N'33 Quang Trung, Gò Vấp, TP.HCM'),
@@ -56,7 +167,7 @@ VALUES
 (N'Hoàng Văn Tâm',  '0916789012', 'tam.hoang@gmail.com',  N'140 Điện Biên Phủ, Bình Thạnh, TP.HCM'),
 (N'Vũ Bích Thảo',   '0927890123', 'thao.vu@gmail.com',    N'3 Nam Quốc Cang, Quận 1, TP.HCM'),
 (N'Đỗ Hoàng Thịnh', '0938901234', 'thinh.do@gmail.com',   N'88 Pasteur, Quận 1, TP.HCM'),
-(N'Ngô Văn Toàn','0949012345', 'toan.ngo@gmail.com',   N'19 Lê Lai, Quận 1, TP.HCM'),
+(N'Ngô Văn Toàn',   '0949012345', 'toan.ngo@gmail.com',   N'19 Lê Lai, Quận 1, TP.HCM'),
 (N'Bùi Thị Trang',  '0960123456', 'trang.bui@gmail.com',  N'74 Nguyễn Trãi, Quận 1, TP.HCM'),
 (N'Đặng Văn Trung', '0971112223', 'trung.dang@gmail.com', N'40 Võ Thị Sáu, Quận 3, TP.HCM'),
 (N'Dương Thị Vân',  '0982223334', 'van.duong@gmail.com',  N'99 Trần Quốc Thảo, Quận 3, TP.HCM'),
@@ -65,11 +176,16 @@ VALUES
 (N'Đoàn Quốc Yên',  '0915556667', 'yen.doan@gmail.com',   N'80 Nơ Trang Long, Bình Thạnh, TP.HCM');
 GO
 
+-- PETS: Dữ liệu cũ
 INSERT INTO PETS (customerID, typeID, name, gender, date_of_birth, weight, note) 
 VALUES
-(1,  1, N'Milo',   N'Đực', '2021-03-15', 12.50, N'Chó Corgi, hay bị dị ứng da'),
-(2,  2, N'Luna',   N'Cái', '2022-07-20',  4.20, N'Mèo Anh lông ngắn, đã triệt sản'),
-(3,  3, N'Bunny',  N'Cái', '2023-01-10',  1.80, N'Thỏ tai cụp, ăn uống tốt'),
+(1, 1, N'Milo',  N'Đực', '2021-03-15', 12.50, N'Chó Corgi, hay bị dị ứng da'),
+(2, 2, N'Luna',  N'Cái', '2022-07-20',  4.20, N'Mèo Anh lông ngắn, đã triệt sản'),
+(3, 3, N'Bunny', N'Cái', '2023-01-10',  1.80, N'Thỏ tai cụp, ăn uống tốt');
+
+-- PETS: Dữ liệu mới
+INSERT INTO PETS (customerID, typeID, name, gender, date_of_birth, weight, note) 
+VALUES
 (4,  1, N'Kiki',   N'Đực', '2020-05-12', 15.00, N'Chó Poodle nâu'),
 (5,  2, N'Miu',    N'Cái', '2021-09-01',  3.50, N'Mèo Ta lông vàng'),
 (6,  1, N'Rocky',  N'Đực', '2019-11-20', 28.00, N'Chó Golden Retriever'),
@@ -95,7 +211,7 @@ VALUES
 (26, 2, N'Mật',    N'Cái', '2022-09-09',  4.00, N'Mèo Vàng'),
 (27, 5, N'Tẹt',    N'Đực', '2023-09-01',  0.10, N'Hamster Winter White'),
 (28, 1, N'Cún',    N'Đực', '2020-10-10', 16.50, N'Chó Samoyed'),
-(29, 2, N'Xám',   N'Đực', '2021-05-18',  4.70, N'Mèo Anh Lông Ngắn Xám'),
+(29, 2, N'Xám',    N'Đực', '2021-05-18',  4.70, N'Mèo Anh Lông Ngắn Xám'),
 (30, 1, N'Toby',   N'Đực', '2022-01-22',  7.80, N'Chó Beagle'),
 (31, 2, N'Bơ',     N'Cái', '2022-08-08',  3.70, N'Mèo Tam Thể'),
 (32, 1, N'Nâu',    N'Đực', '2021-04-04', 13.00, N'Chó Doberman con'),
@@ -119,42 +235,16 @@ VALUES
 (50, 1, N'Xoăn',   N'Đực', '2022-11-11',  7.00, N'Chó Poodle Trắng');
 GO
 
-INSERT INTO DOCTORS (fullName, phone, email, licenseNumber, status) 
-VALUES
-(N'BS. Phạm Quốc Dũng', '0938111222', 'dung.pham@petclinic.vn', 'GP-2015-0001', N'Active'),
-(N'BS. Võ Thu Hà',      '0938333444', 'ha.vo@petclinic.vn',     'GP-2018-0002', N'Active'),
-(N'BS. Đặng Hoàng Nam', '0938555666', 'nam.dang@petclinic.vn',  'GP-2020-0003', N'OnLeave'),
-(N'BS. Nguyễn Thanh Tùng','0938777888','tung.nguyen@petclinic.vn','GP-2021-0004', N'Active'),
-(N'BS. Lê Thị Mai',     '0938999000', 'mai.le@petclinic.vn',    'GP-2022-0005', N'Active');
-GO
 
-INSERT INTO DOCTOR_SPECIALIZATION (doctorID, specialization) 
-VALUES
-(1, N'Nội khoa'),
-(1, N'Chẩn đoán hình ảnh'),
-(2, N'Ngoại khoa'),
-(2, N'Phẫu thuật'),
-(3, N'Da liễu'),
-(4, N'Nha khoa thú cưng'),
-(5, N'Dinh dưỡng & Tiêm phòng');
-GO
+-- Dữ liệu cũ
+INSERT INTO MEDICAL_RECORD (petID, generalNote, allergyNote, bloodType) VALUES
+(1, N'Sức khỏe tổng quát tốt',        N'Dị ứng phấn hoa',   N'DEA 1.1+'),
+(2, N'Đã tiêm phòng đầy đủ',          NULL,                  N'A'),
+(3, N'Cần theo dõi cân nặng định kỳ', N'Dị ứng cỏ khô',     NULL);
 
-INSERT INTO DOCTOR_SCHEDULE (doctorID, day_of_week, startTime, endTime) 
-VALUES
-(1, 2, '08:00', '12:00'),
-(1, 3, '08:00', '12:00'),
-(2, 4, '13:00', '17:00'),
-(2, 5, '13:00', '17:00'),
-(3, 7, '08:00', '16:00'),
-(4, 6, '08:00', '17:00'),
-(5, 8, '08:00', '12:00');
-GO
-
+-- Dữ liệu mới
 INSERT INTO MEDICAL_RECORD (petID, generalNote, allergyNote, bloodType) 
 VALUES
-(1,  N'Sức khỏe tổng quát tốt',        N'Dị ứng phấn hoa',   N'DEA 1.1+'),
-(2,  N'Đã tiêm phòng đầy đủ',          NULL,                  N'A'),
-(3,  N'Cần theo dõi cân nặng định kỳ', N'Dị ứng cỏ khô',     NULL),
 (4,  N'Thường xuyên kiểm tra tai',     NULL,                  N'DEA 1.1-'),
 (5,  N'Đã tẩy giun định kỳ',           NULL,                  N'B'),
 (6,  N'Xương khớp khỏe mạnh',          N'Dị ứng hải sản',    N'DEA 1.1+'),
@@ -204,53 +294,17 @@ VALUES
 (50, N'Đã cắt tỉa lông gọn gàng',      NULL,                  N'DEA 1.1-');
 GO
 
-INSERT INTO SERVICES (serviceName, description, price, status) 
-VALUES
-(N'Khám tổng quát', N'Khám sức khỏe tổng quát cho thú cưng',   150000, N'Active'),
-(N'Tắm và vệ sinh', N'Tắm, sấy, cắt tỉa móng, vệ sinh tai',    120000, N'Active'),
-(N'Xét nghiệm máu', N'Xét nghiệm công thức máu và sinh hóa',   350000, N'Active'),
-(N'Siêu âm tổng quát', N'Siêu âm chẩn đoán hình ảnh ổ bụng',  250000, N'Active'),
-(N'Triệt sản', N'Phẫu thuật triệt sản an toàn',                800000, N'Active'),
-(N'Cạo vôi răng', N'Vệ sinh và cạo vôi răng siêu âm',          300000, N'Active');
-GO
 
-INSERT INTO VACCINE (name, manufacturer, description, price, rcmInterval) 
-VALUES
-(N'Vaccine 7 bệnh cho chó', N'Zoetis',      N'Phòng Care, Parvo, Viêm gan, Cúm...', 250000, 365),
-(N'Vaccine 4 bệnh cho mèo', N'Boehringer',  N'Phòng Rhinotracheitis, Calici, Panleukopenia', 280000, 365),
-(N'Vaccine dại',            N'Nobivac',     N'Phòng bệnh dại cho chó mèo',           150000, 365),
-(N'Vaccine 5 bệnh cho chó', N'Vanguard',    N'Phòng các bệnh truyền nhiễm cơ bản',   200000, 365);
-GO
-
-INSERT INTO MEDICINE (name, genericName, description, unit, quantity, price, expiryDay) 
-VALUES
-(N'Cetirizine 10mg',  N'Cetirizine',    N'Thuốc kháng histamin',       N'Viên', 500,  5000, '2027-12-31'),
-(N'Amoxicillin 250mg',N'Amoxicillin',   N'Kháng sinh phổ rộng',        N'Viên', 800,  4000, '2027-08-30'),
-(N'Men tiêu hóa Pro', N'Probiotic',     N'Hỗ trợ hệ tiêu hóa',         N'Gói',  300,  8000, '2027-05-15'),
-(N'Thuốc nhỏ mắt Tobra',N'Tobramycin',  N'Điều trị viêm kết mạc',      N'Chai', 150, 45000, '2026-11-20'),
-(N'Xịt trị rận Frontline',N'Fipronil',   N'Trị ve rận bọ chét',         N'Chai', 100,180000, '2028-01-10');
-GO
-
-INSERT INTO MEDICINE_CATEGORY (medicineID, category) 
-VALUES
-(1, N'Kháng histamin'),
-(2, N'Kháng sinh'),
-(3, N'Hỗ trợ tiêu hóa'),
-(4, N'Thuốc nhỏ mắt'),
-(5, N'Trị ký sinh trùng');
-GO
-
-INSERT INTO PAYMENT_METHOD (typeName, description) VALUES
-(N'Tiền mặt',       N'Thanh toán trực tiếp tại quầy'),
-(N'Chuyển khoản',   N'Chuyển khoản ngân hàng'),
-(N'Thẻ tín dụng',   N'Thanh toán bằng thẻ Visa/Mastercard');
-GO
-
+-- APPOINTMENT: Dữ liệu cũ
 INSERT INTO APPOINTMENT (customerID, petID, doctorID, appointmentDate, appointmentTime, reason, note, status) 
 VALUES
-(1,  1,  1, '2026-09-28', '09:00', N'Khám da, ngứa nhiều',       N'Mang theo sổ tiêm chủng', N'Completed'),
-(2,  2,  2, '2026-09-29', '14:00', N'Tiêm phòng định kỳ',        NULL,                       N'Completed'),
-(3,  3,  3, '2026-10-02', '10:30', N'Bỏ ăn 2 ngày',              N'Khách đến sớm 15 phút',   N'Completed'),
+(1, 1, 1, '2026-09-28', '09:00', N'Khám da, ngứa nhiều',       N'Mang theo sổ tiêm chủng', N'Completed'),
+(2, 2, 2, '2026-09-29', '14:00', N'Tiêm phòng định kỳ',        NULL,                       N'Completed'),
+(3, 3, 3, '2026-10-02', '10:30', N'Bỏ ăn 2 ngày',              N'Khách đến sớm 15 phút',   N'Confirmed');
+
+-- APPOINTMENT: Dữ liệu mới
+INSERT INTO APPOINTMENT (customerID, petID, doctorID, appointmentDate, appointmentTime, reason, note, status) 
+VALUES
 (4,  4,  4, '2026-10-03', '08:30', N'Vệ sinh răng miệng',        NULL,                       N'Completed'),
 (5,  5,  5, '2026-10-04', '09:15', N'Tiêm vaccine dại',          NULL,                       N'Completed'),
 (6,  6,  1, '2026-10-05', '10:00', N'Kiểm tra khớp chân',        NULL,                       N'Completed'),
@@ -300,19 +354,27 @@ VALUES
 (50, 50, 4, '2026-10-27', '14:00', N'Vệ sinh răng & tắm',       NULL,                       N'Completed');
 GO
 
+-- APPOINTMENT_SERVICE: Dữ liệu cũ
 INSERT INTO APPOINTMENT_SERVICE (appointmentID, serviceID, quantity, unitPrice) 
 VALUES
-(1, 1, 1, 150000), (1, 3, 1, 350000),
-(2, 1, 1, 150000),
+(1, 1, 1, 150000),
+(1, 3, 1, 350000),
+(2, 1, 1, 150000);
+
+-- APPOINTMENT_SERVICE: Dữ liệu mới
+INSERT INTO APPOINTMENT_SERVICE (appointmentID, serviceID, quantity, unitPrice) 
+VALUES
 (3, 1, 1, 150000),
 (4, 6, 1, 300000),
 (5, 1, 1, 150000),
-(6, 1, 1, 150000), (6, 4, 1, 250000),
+(6, 1, 1, 150000), 
+(6, 4, 1, 250000),
 (7, 5, 1, 800000),
 (8, 1, 1, 150000),
 (9, 1, 1, 150000),
 (10, 1, 1, 150000),
-(11, 1, 1, 150000), (11, 4, 1, 250000),
+(11, 1, 1, 150000), 
+(11, 4, 1, 250000),
 (12, 1, 1, 150000),
 (13, 1, 1, 150000),
 (14, 1, 1, 150000),
@@ -330,7 +392,8 @@ VALUES
 (26, 1, 1, 150000),
 (27, 1, 1, 150000),
 (28, 1, 1, 150000),
-(29, 1, 1, 150000), (29, 3, 1, 350000),
+(29, 1, 1, 150000), 
+(29, 3, 1, 350000),
 (30, 1, 1, 150000),
 (31, 2, 1, 120000),
 (32, 1, 1, 150000),
@@ -343,7 +406,8 @@ VALUES
 (39, 2, 1, 120000),
 (40, 1, 1, 150000),
 (41, 1, 1, 150000),
-(42, 1, 1, 150000), (42, 4, 1, 250000),
+(42, 1, 1, 150000), 
+(42, 4, 1, 250000),
 (43, 1, 1, 150000),
 (44, 1, 1, 150000),
 (45, 2, 1, 120000),
@@ -351,14 +415,21 @@ VALUES
 (47, 1, 1, 150000),
 (48, 1, 1, 150000),
 (49, 1, 1, 150000),
-(50, 2, 1, 120000), (50, 6, 1, 300000);
+(50, 2, 1, 120000), 
+(50, 6, 1, 300000);
 GO
 
+
+-- MEDICAL_VISIT: Dữ liệu cũ
 INSERT INTO MEDICAL_VISIT (recordID, petID, doctorID, appointmentID, vaccinID, reason, note, status) 
 VALUES
-(1,  1,  1, 1,  NULL, N'Khám da, ngứa nhiều',  N'Viêm da dị ứng',             N'Completed'),
-(2,  2,  2, 2,  2,    N'Tiêm phòng định kỳ',   N'Phản ứng tốt sau tiêm',      N'Completed'),
-(3,  3,  3, 3,  NULL, N'Bỏ ăn 2 ngày',         N'Theo dõi đường ruột',        N'Completed'),
+(1, 1, 1, 1, NULL, N'Khám da, ngứa nhiều',  N'Nghi viêm da dị ứng',        N'Completed'),
+(2, 2, 2, 2, 2,    N'Tiêm phòng định kỳ',   N'Mèo phản ứng tốt sau tiêm',  N'Completed'),
+(3, 3, 3, 3, NULL, N'Bỏ ăn 2 ngày',         N'Đang khám và theo dõi',      N'InProgress');
+
+-- MEDICAL_VISIT: Dữ liệu mới
+INSERT INTO MEDICAL_VISIT (recordID, petID, doctorID, appointmentID, vaccinID, reason, note, status) 
+VALUES
 (4,  4,  4, 4,  NULL, N'Vệ sinh răng',         N'Đã cạo vôi răng sạch',       N'Completed'),
 (5,  5,  5, 5,  3,    N'Tiêm dại',             N'Tiêm mũi nhắc lại',          N'Completed'),
 (6,  6,  1, 6,  NULL, N'Khám khớp',            N'Nghi thoái hóa nhẹ',         N'Completed'),
@@ -408,11 +479,16 @@ VALUES
 (50, 50, 4, 50, NULL, N'Vệ sinh & Tắm',        N'Hoàn thành',                 N'Completed');
 GO
 
+-- VITAL_SIGN: Dữ liệu cũ
 INSERT INTO VITAL_SIGN (visitID, weight, temperature, respiratoryRate, note) 
 VALUES
-(1,  12.60, 38.6, 24, N'Bình thường'),
-(2,   4.25, 38.4, 30, N'Ổn định trước khi tiêm'),
-(3,   1.75, 39.4, 45, N'Sốt nhẹ, thở nhanh'),
+(1, 12.60, 38.6, 24, N'Bình thường'),
+(2,  4.25, 38.4, 30, N'Ổn định trước khi tiêm'),
+(3,  1.75, 39.4, 45, N'Sốt nhẹ, thở nhanh');
+
+-- VITAL_SIGN: Dữ liệu mới
+INSERT INTO VITAL_SIGN (visitID, weight, temperature, respiratoryRate, note) 
+VALUES
 (4,  15.10, 38.5, 22, N'Thể trạng tốt'),
 (5,   3.50, 38.3, 28, N'Bình thường'),
 (6,  28.20, 38.7, 20, N'Hơi đau chân khi đè ấn'),
@@ -462,11 +538,16 @@ VALUES
 (50,  7.00, 38.5, 23, N'Tốt');
 GO
 
+-- DIAGNOSIS: Dữ liệu cũ
 INSERT INTO DIAGNOSIS (visitID, diagnosisName, severity, description) 
 VALUES
-(1,  N'Viêm da dị ứng',        N'Moderate', N'Da đỏ, ngứa, rụng lông vùng bụng'),
-(2,  N'Khỏe mạnh',             N'Mild',     N'Đủ điều kiện tiêm phòng'),
-(3,  N'Rối loạn tiêu hóa',     N'Moderate', N'Nghi ngưng trệ đường ruột'),
+(1, N'Viêm da dị ứng',        N'Moderate', N'Da đỏ, ngứa, rụng lông vùng bụng'),
+(2, N'Khỏe mạnh',             N'Mild',     N'Đủ điều kiện tiêm phòng'),
+(3, N'Rối loạn tiêu hóa',     N'Moderate', N'Nghi ngưng trệ đường ruột');
+
+-- DIAGNOSIS: Dữ liệu mới
+INSERT INTO DIAGNOSIS (visitID, diagnosisName, severity, description) 
+VALUES
 (4,  N'Vôi răng độ 2',         N'Mild',     N'Mảng bám tích tụ ở răng hàm'),
 (5,  N'Khỏe mạnh',             N'Mild',     N'Tiêm phòng dại định kỳ'),
 (6,  N'Thoái hóa khớp nhẹ',    N'Mild',     N'Đau nhẹ khi vận động mạnh'),
@@ -516,10 +597,17 @@ VALUES
 (50, N'Khỏe mạnh',             N'Mild',     N'Vệ sinh tổng quát tốt');
 GO
 
-INSERT INTO PRESCRIPTION (visitID, doctorID, prescriptionDate, note) VALUES
-(1,  1, '2026-09-28 09:45', N'Uống sau ăn, tái khám sau 7 ngày'),
-(2,  2, '2026-09-29 14:30', N'Theo dõi phản ứng sau tiêm 24 giờ'),
-(3,  3, '2026-09-29 11:00', N'Cho ăn thức ăn mềm, tái khám nếu không cải thiện'),
+
+-- PRESCRIPTION: Dữ liệu cũ
+INSERT INTO PRESCRIPTION (visitID, doctorID, prescriptionDate, note) 
+VALUES
+(1, 1, '2026-09-28 09:45', N'Uống sau ăn, tái khám sau 7 ngày'),
+(2, 2, '2026-09-29 14:30', N'Theo dõi phản ứng sau tiêm 24 giờ'),
+(3, 3, '2026-09-29 11:00', N'Cho ăn thức ăn mềm, tái khám nếu không cải thiện');
+
+-- PRESCRIPTION: Dữ liệu mới
+INSERT INTO PRESCRIPTION (visitID, doctorID, prescriptionDate, note) 
+VALUES
 (10, 1, '2026-10-07 15:30', N'Cho uống kháng sinh đều đặn 5 ngày'),
 (11, 2, '2026-10-07 16:30', N'Hạn chế cho ăn đồ dầu mỡ'),
 (14, 1, '2026-10-09 09:00', N'Nhỏ tai hàng ngày sau khi lau sạch'),
@@ -529,23 +617,36 @@ INSERT INTO PRESCRIPTION (visitID, doctorID, prescriptionDate, note) VALUES
 (47, 3, '2026-10-25 15:30', N'Xịt thuốc trị rận và dùng kháng sinh');
 GO
 
-INSERT INTO PRESCRIPTION_DETAIL (prescriptionID, medicineID, quantity, unitPrice, dosage, frequency, duration, instruction) VALUES
+-- PRESCRIPTION_DETAIL: Dữ liệu cũ
+INSERT INTO PRESCRIPTION_DETAIL (prescriptionID, medicineID, quantity, unitPrice, dosage, frequency, duration, instruction) 
+VALUES
 (1, 1, 14, 5000, N'1/2 viên', N'2 lần/ngày', N'7 ngày', N'Uống sau ăn'),
 (2, 2, 10, 4000, N'1 viên',   N'2 lần/ngày', N'5 ngày', N'Uống cùng thức ăn'),
-(3, 3,  6, 8000, N'1 gói',    N'1 lần/ngày', N'6 ngày', N'Trộn vào thức ăn'),
+(3, 3,  6, 8000, N'1 gói',    N'1 lần/ngày', N'6 ngày', N'Trộn vào thức ăn');
+
+-- PRESCRIPTION_DETAIL: Dữ liệu mới
+INSERT INTO PRESCRIPTION_DETAIL (prescriptionID, medicineID, quantity, unitPrice, dosage, frequency, duration, instruction) 
+VALUES
 (4, 2, 10, 4000, N'1/2 viên', N'2 lần/ngày', N'5 ngày', N'Uống sau ăn'),
 (5, 3,  5, 8000, N'1 gói',    N'1 lần/ngày', N'5 ngày', N'Hòa nước uống'),
 (6, 4,  1, 45000,N'2 giọt',   N'2 lần/ngày', N'7 ngày', N'Nhỏ trực tiếp vào tai'),
 (7, 4,  1, 45000,N'1 giọt',   N'3 lần/ngày', N'5 ngày', N'Nhỏ vào mắt tổn thương'),
 (8, 2,  6, 4000, N'1/2 viên', N'2 lần/ngày', N'3 ngày', N'Uống sau ăn'),
-(9, 3,  6, 8000, N'1 gói',    N'2 lần/ngày', N'3 ngày', N'Pha nước ấm'),
+(9, 3,  6, 8000, N'2 gói',    N'2 lần/ngày', N'3 ngày', N'Pha nước ấm'),
 (10,5,  1, 180000,N'Xịt 2-3 xịt',N'1 lần/tuần',N'2 tuần',N'Xịt dọc sống lưng');
 GO
 
-INSERT INTO INVOICE (customerID, visitID, discount, total, status) VALUES
-(1,  1,  0,     570000, N'Paid'),
-(2,  2,  20000, 430000, N'Paid'),
-(3,  3,  0,     198000, N'Paid'),
+
+-- INVOICE: Dữ liệu cũ
+INSERT INTO INVOICE (customerID, visitID, discount, total, status) 
+VALUES
+(1, 1, 0,     570000, N'Paid'),
+(2, 2, 20000, 450000, N'Paid'),
+(3, 3, 0,     198000, N'Unpaid');
+
+-- INVOICE: Dữ liệu mới
+INSERT INTO INVOICE (customerID, visitID, discount, total, status) 
+VALUES
 (4,  4,  0,     300000, N'Paid'),
 (5,  5,  0,     300000, N'Paid'),
 (6,  6,  0,     400000, N'Paid'),
@@ -595,10 +696,16 @@ INSERT INTO INVOICE (customerID, visitID, discount, total, status) VALUES
 (50, 50, 0,     420000, N'Unpaid');
 GO
 
-INSERT INTO PAYMENT (invoiceID, paymentMethodID, paymentDate, amount, status) VALUES
-(1,  1, '2026-09-28 10:15', 570000, N'Success'),
-(2,  2, '2026-09-29 15:00', 430000, N'Success'),
-(3,  1, '2026-10-02 11:30', 198000, N'Success'),
+-- PAYMENT: Dữ liệu cũ
+INSERT INTO PAYMENT (invoiceID, paymentMethodID, paymentDate, amount, status) 
+VALUES
+(1, 1, '2026-09-28 10:15', 570000, N'Success'),
+(2, 2, '2026-09-29 15:00', 450000, N'Success'),
+(3, 3, '2026-09-29 12:00',  98000, N'Pending');
+
+-- PAYMENT: Dữ liệu mới
+INSERT INTO PAYMENT (invoiceID, paymentMethodID, paymentDate, amount, status) 
+VALUES
 (4,  3, '2026-10-03 09:30', 300000, N'Success'),
 (5,  1, '2026-10-04 10:00', 300000, N'Success'),
 (6,  2, '2026-10-05 10:45', 400000, N'Success'),
@@ -647,7 +754,7 @@ INSERT INTO PAYMENT (invoiceID, paymentMethodID, paymentDate, amount, status) VA
 (49, 1, '2026-10-26 10:30', 150000, N'Success');
 GO
 
--- Kiểm tra số dòng 
+-- Kiểm tra số dòng sau khi chèn dữ liệu
 SELECT 'CUSTOMERS' AS TableName, COUNT(*) AS Total FROM CUSTOMERS UNION ALL
 SELECT 'PET_TYPES', COUNT(*) FROM PET_TYPES UNION ALL
 SELECT 'PETS', COUNT(*) FROM PETS UNION ALL

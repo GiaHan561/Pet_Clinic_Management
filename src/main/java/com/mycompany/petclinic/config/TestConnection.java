@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 
 public class TestConnection {
     public static void main(String[] args) {
-        String sql = "SELECT * FROM CUSTOMERS";
+        String sql = "SELECT TOP 5 * FROM CUSTOMERS";
 
         try (
             Connection conn = DatabaseConnection.getConnection();
