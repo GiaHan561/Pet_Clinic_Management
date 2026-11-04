@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Maven
 target/
 *.class
@@ -12,3 +13,8 @@ nbproject/private/
 # OS
 .DS_Store
 Thumbs.db
+=======
+target/
+nbproject/private/
+*.log
+>>>>>>> 4ce0b30 (Loi Server)

@@ -1,12 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author DELL
- */
 package com.mycompany.petclinic.config;
 
 import java.sql.Connection;
@@ -16,7 +7,7 @@ import java.sql.SQLException;
 public class DatabaseConnection {
 
     private static final String URL =
-            "jdbc:sqlserver://localhost:65243;"
+            "jdbc:sqlserver://localhost:1433;"
             + "databaseName=PetClinic;"
             + "encrypt=true;"
             + "trustServerCertificate=true;";
