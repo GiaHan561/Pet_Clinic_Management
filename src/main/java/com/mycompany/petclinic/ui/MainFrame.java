@@ -8,9 +8,13 @@
  * @author DELL
  */
 package com.mycompany.petclinic.ui;
+import com.mycompany.petclinic.ui.customer.CustomerPanel;
+import com.mycompany.petclinic.ui.pet.PetPanel;
  
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+
+
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,24 +65,32 @@ public class MainFrame extends JFrame {
  
     public MainFrame() {
         super("PetClinic - Quản lý phòng khám thú y");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1200, 760);
-        setMinimumSize(new Dimension(1000, 640));
-        setLocationRelativeTo(null);
- 
-        contentPanel.setBackground(Color.WHITE);
-        registerPanel(KEY_WELCOME, createWelcomePanel());
-        registerPanel(KEY_DASHBOARD, dashboardPanel);
-        dashboardPanel.setOnViewAllAppointments(() -> {
-            showPanel(KEY_APPOINTMENT);
-        });
- 
-        add(createSidebar(), BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
- 
-        // Như thiết kế: mở app hiện màn hình chào, mục Dashboard được tô sáng
-        cardLayout.show(contentPanel, KEY_WELCOME);
-        selectMenu(KEY_DASHBOARD);
+
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setSize(1200, 760);
+    setMinimumSize(new Dimension(1000, 640));
+    setLocationRelativeTo(null);
+
+    contentPanel.setBackground(Color.WHITE);
+
+    // Đăng ký các giao diện
+    registerPanel(KEY_WELCOME, createWelcomePanel());
+    registerPanel(KEY_DASHBOARD, dashboardPanel);
+
+    // Hai giao diện bạn phụ trách
+    registerPanel(KEY_CUSTOMER, new CustomerPanel());
+    registerPanel(KEY_PET, new PetPanel());
+
+    dashboardPanel.setOnViewAllAppointments(() -> {
+        showPanel(KEY_APPOINTMENT);
+    });
+
+    add(createSidebar(), BorderLayout.WEST);
+    add(contentPanel, BorderLayout.CENTER);
+
+    // Hiển thị trang chào khi mở chương trình
+    cardLayout.show(contentPanel, KEY_WELCOME);
+    selectMenu(KEY_DASHBOARD);
     }
  
     /* API điều hướng*/
@@ -93,19 +105,21 @@ public class MainFrame extends JFrame {
     }
  
     /* Chuyển sang panel theo key; nếu chưa đăng ký sẽ hiện panel "đang phát triển". */
-    public void showPanel(String key) {
-        if (!panels.containsKey(key)) {
-            String title = key;
-            for (String[] m : MENU) {
-                if (m[0].equals(key)) {
-                    title = m[1];
-                }
-            }
-            registerPanel(key, createPlaceholder(title));
-        }
-        cardLayout.show(contentPanel, key);
-        selectMenu(key);
+ public void showPanel(String key) {
+
+
+    if (!panels.containsKey(key)) {
+     
+        return;
+        
     }
+
+    cardLayout.show(contentPanel, key);
+    selectMenu(key);
+
+    contentPanel.revalidate();
+    contentPanel.repaint();
+}
  
     public DashboardPanel getDashboardPanel() {
         return dashboardPanel;
