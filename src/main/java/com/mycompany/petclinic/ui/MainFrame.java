@@ -111,7 +111,6 @@ public class MainFrame extends JFrame {
     if (!panels.containsKey(key)) {
      
         return;
-        
     }
 
     cardLayout.show(contentPanel, key);

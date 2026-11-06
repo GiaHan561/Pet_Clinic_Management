@@ -131,7 +131,16 @@ public class CustomerPanel extends javax.swing.JPanel {
     }
     private void message(String m) { JOptionPane.showMessageDialog(this, m); }
     private void showError(SQLException ex) {
-        JOptionPane.showMessageDialog(this, ex.getMessage(), "Lỗi SQL Server", JOptionPane.ERROR_MESSAGE);
+        String message = ex.getMessage();
+
+        if (ex.getErrorCode() == 547
+                && message != null
+                && message.contains("CK_CUSTOMERS_phone")) {
+            message = "Số điện thoại phải gồm đúng 10 chữ số.";
+        }
+
+        JOptionPane.showMessageDialog(
+                this, message, "Lỗi SQL Server", JOptionPane.ERROR_MESSAGE);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
