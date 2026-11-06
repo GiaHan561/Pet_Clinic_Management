@@ -143,6 +143,7 @@ public class PetPanel extends javax.swing.JPanel {
                 selectRow();
             }
         });
+        
     }
 
     // ------------------------------------------------------------------
@@ -380,6 +381,19 @@ public class PetPanel extends javax.swing.JPanel {
             message(ex.getMessage());
         }
     }
+    public void openForCustomer(int customerId) {
+        clearFields();
+        txtCustomer.setText(String.valueOf(customerId));
+        txtCustomer.setEditable(false);
+        txtCustomer.setBackground(READONLY);
+        showPets(List.of());
+
+        try {
+            showPets(petDAO.findByCustomerId(customerId));
+        } catch (SQLException ex) {
+            showError(ex);
+        }
+    }
 
     private void searchPets() {
         try {
@@ -567,6 +581,8 @@ public class PetPanel extends javax.swing.JPanel {
         selectedPet = null;
         txtID.setText("");
         txtCustomer.setText("");
+        txtCustomer.setEditable(true);
+        txtCustomer.setBackground(Color.WHITE);
         txtName.setText("");
         txtBirth.setText("");
         txtWeight.setText("");
@@ -574,6 +590,7 @@ public class PetPanel extends javax.swing.JPanel {
         cbGender.setSelectedIndex(0);
         cbType.setSelectedIndex(-1);
         setSelectedMode(false);
+        txtCustomer.setFocusable(true);
         txtCustomer.requestFocus();
     }
 

@@ -1,4 +1,5 @@
 package com.mycompany.petclinic.ui.customer;
+import java.util.function.IntConsumer;
 
 import com.mycompany.petclinic.dao.CustomerDAO;
 import com.mycompany.petclinic.model.Customer;
@@ -55,6 +56,7 @@ public class CustomerPanel extends javax.swing.JPanel {
     private static final Color ZEBRA = new Color(246, 249, 255);
     private static final Color SELECT = new Color(213, 228, 252);
     private static final Color DISABLED = new Color(208, 213, 223);
+    private int hoveredCustomerRow = -1;
 
     private static final Pattern PHONE_REGEX = Pattern.compile("^\\d{10}$");
     private static final Pattern EMAIL_REGEX =
@@ -65,7 +67,10 @@ public class CustomerPanel extends javax.swing.JPanel {
     private final CustomerDAO dao = new CustomerDAO();
     private DefaultTableModel model;
 
-    public CustomerPanel() {
+    private final IntConsumer openPetsForCustomer;
+
+    public CustomerPanel(IntConsumer openPetsForCustomer) {
+        this.openPetsForCustomer = openPetsForCustomer;
         initComponents();
         initTable();
         applyStyle();
@@ -116,6 +121,53 @@ public class CustomerPanel extends javax.swing.JPanel {
                 selectRow();
             }
         });
+        tblData.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tblData.rowAtPoint(e.getPoint());
+                int column = tblData.columnAtPoint(e.getPoint());
+
+                if (e.getButton() == MouseEvent.BUTTON1
+                        && row >= 0
+                        && column >= 0
+                        && tblData.convertColumnIndexToModel(column) == 0) {
+                    int modelRow = tblData.convertRowIndexToModel(row);
+                    int customerId = (Integer) model.getValueAt(modelRow, 0);
+                    openPetsForCustomer.accept(customerId);
+                }
+            }
+        });
+        MouseAdapter customerHover = new MouseAdapter() {
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            int row = tblData.rowAtPoint(e.getPoint());
+            int column = tblData.columnAtPoint(e.getPoint());
+
+            boolean overCustomerId = row >= 0 && column >= 0
+                    && tblData.convertColumnIndexToModel(column) == 0;
+
+            updateHover(overCustomerId ? row : -1);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            updateHover(-1);
+        }
+
+        private void updateHover(int row) {
+            if (hoveredCustomerRow == row) {
+                return;
+            }
+            hoveredCustomerRow = row;
+            tblData.setCursor(Cursor.getPredefinedCursor(
+                    row >= 0 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
+            tblData.repaint();
+        }
+    };
+
+    tblData.addMouseMotionListener(customerHover);
+    tblData.addMouseListener(customerHover);
+
     }
 
     // ------------------------------------------------------------------
@@ -247,6 +299,9 @@ public class CustomerPanel extends javax.swing.JPanel {
             setHorizontalAlignment(value instanceof Integer ? CENTER : LEFT);
             setForeground(TEXT);
             setBackground(sel ? SELECT : (row % 2 == 0 ? Color.WHITE : ZEBRA));
+            if (row == hoveredCustomerRow && t.convertColumnIndexToModel(col) == 0) {
+            setBackground(new Color(230, 240, 255));
+            }
             return this;
         }
     }
@@ -301,6 +356,7 @@ public class CustomerPanel extends javax.swing.JPanel {
                 message("Đã thêm khách hàng, mã: " + id);
                 loadCustomers();
                 clearFields();
+                openPetsForCustomer.accept(id);
             } else {
                 message("Không lấy được mã khách hàng vừa tạo.");
             }

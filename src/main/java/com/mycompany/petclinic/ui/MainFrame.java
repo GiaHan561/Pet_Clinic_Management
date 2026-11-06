@@ -32,7 +32,7 @@ public class MainFrame extends JFrame {
     public static final String KEY_DASHBOARD = "dashboard";
     public static final String KEY_CUSTOMER = "customer";
     public static final String KEY_PET = "pet";
-    
+
     public static final String KEY_DOCTOR = "doctor";
     public static final String KEY_APPOINTMENT = "appointment";
     public static final String KEY_MEDICAL = "medical";
@@ -79,8 +79,14 @@ public class MainFrame extends JFrame {
     registerPanel(KEY_DASHBOARD, dashboardPanel);
 
     // Hai giao diện bạn phụ trách
-    registerPanel(KEY_CUSTOMER, new CustomerPanel());
-    registerPanel(KEY_PET, new PetPanel());
+   PetPanel petPanel = new PetPanel();
+
+    registerPanel(KEY_CUSTOMER, new CustomerPanel(customerId -> {
+        showPanel(KEY_PET);
+        petPanel.openForCustomer(customerId);
+    }));
+
+    registerPanel(KEY_PET, petPanel);
 
     dashboardPanel.setOnViewAllAppointments(() -> {
         showPanel(KEY_APPOINTMENT);
@@ -88,6 +94,7 @@ public class MainFrame extends JFrame {
 
     add(createSidebar(), BorderLayout.WEST);
     add(contentPanel, BorderLayout.CENTER);
+    
 
     // Hiển thị trang chào khi mở chương trình
     cardLayout.show(contentPanel, KEY_WELCOME);
