@@ -32,6 +32,7 @@ public class MainFrame extends JFrame {
     public static final String KEY_DASHBOARD = "dashboard";
     public static final String KEY_CUSTOMER = "customer";
     public static final String KEY_PET = "pet";
+    
     public static final String KEY_DOCTOR = "doctor";
     public static final String KEY_APPOINTMENT = "appointment";
     public static final String KEY_MEDICAL = "medical";
@@ -298,6 +299,7 @@ public class MainFrame extends JFrame {
             g2.dispose();
         }
     }
+
     
     
     /**
