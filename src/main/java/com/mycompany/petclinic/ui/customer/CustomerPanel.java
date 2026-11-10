@@ -351,6 +351,12 @@ public class CustomerPanel extends javax.swing.JPanel {
                 txtPhone.getText().trim(),
                 optional(txtEmail.getText()), optional(txtAddress.getText()));
         try {
+            if (dao.findByPhone(customer.getPhone()) != null) {
+                message("Số điện thoại này đã tồn tại. Hãy dùng Tìm SĐT để xem khách hàng cũ.");
+                txtPhone.requestFocus();
+                return;
+            }
+            
             int id = dao.insert(customer);
             if (id > 0) {
                 message("Đã thêm khách hàng, mã: " + id);
@@ -427,6 +433,7 @@ public class CustomerPanel extends javax.swing.JPanel {
             txtPhone.requestFocus();
             return false;
         }
+        
         if (!email.isEmpty() && !EMAIL_REGEX.matcher(email).matches()) {
             message("Email không hợp lệ.");
             txtEmail.requestFocus();
