@@ -1,31 +1,34 @@
 USE PetClinic;
 GO
 
--- KIEM TRA TINH HOP LE CUA DU LIEU
--- QUY UOC: cac truy van o phan nay MONG DOI TRA VE 0 DONG.
--- Neu co dong tra ve la du lieu mau dang co van de
--- Khach hang trung so dien thoai
+-- KIEM TRA TINH HOP LE CUA DU LIEU (CHUAN 3NF)
+-- QUY UOC: Cac truy van o phan nay MONG DOI TRA VE 0 DONG.
+
+-- 1. Khach hang trung so dien thoai
 SELECT phone, COUNT(*) AS soLan
 FROM CUSTOMERS
 GROUP BY phone
 HAVING COUNT(*) > 1;
 
--- Hoa don co khach hang khong phai chu cua thu cung duoc kham
-SELECT i.invoiceID, i.customerID, p.customerID AS petOwnerID
+-- 2. Kiem tra xem khach hang dat Lich hen (APPOINTMENT) co khac chu so huu Thu cung (PETS) hay khong
+SELECT 
+    i.invoiceID, 
+    a.customerID AS appointmentCustomerID, 
+    p.customerID AS petOwnerID
 FROM INVOICE AS i
 JOIN MEDICAL_VISIT AS mv ON mv.visitID = i.visitID
-JOIN PETS AS p ON p.petID = mv.petID
-WHERE i.customerID <> p.customerID;
+JOIN MEDICAL_RECORD AS mr ON mr.recordID = mv.recordID
+JOIN PETS AS p ON p.petID = mr.petID
+LEFT JOIN APPOINTMENT AS a ON a.appointmentID = mv.appointmentID
+WHERE a.customerID IS NOT NULL AND a.customerID <> p.customerID;
 
--- Lich hen 'Completed' nhung chua co lan kham
+-- 3. Lich hen 'Completed' nhung chua co lan kham
 SELECT a.appointmentID, a.appointmentDate, a.status
 FROM APPOINTMENT AS a
 LEFT JOIN MEDICAL_VISIT AS mv ON mv.appointmentID = a.appointmentID
 WHERE a.status = N'Completed' AND mv.visitID IS NULL;
 
--- Lich hen dat ngoai gio lam viec cua bac si (khong tinh lich da huy)
--- day_of_week: 2 = Thu 2, ..., 7 = Thu 7, 8 = Chu nhat.
--- 1900-01-01 la Thu 2, nen cong thuc ben duoi khong phu thuoc SET DATEFIRST.
+-- 4. Lich hen dat ngoai gio lam viec cua bac si (khong tinh lich da huy)
 SELECT a.appointmentID, a.doctorID, a.appointmentDate, a.appointmentTime
 FROM APPOINTMENT AS a
 WHERE a.status <> N'Cancelled'
@@ -38,7 +41,9 @@ WHERE a.status <> N'Cancelled'
         AND a.appointmentTime < s.endTime
   );
 
+
 -- THONG KE THEO TRANG THAI / PHAN LOAI
+
 -- So thu cung theo loai (ke ca loai chua co thu cung)
 SELECT pt.typeName, COUNT(p.petID) AS petCount
 FROM PET_TYPES AS pt
@@ -46,7 +51,9 @@ LEFT JOIN PETS AS p ON p.typeID = pt.typeID
 GROUP BY pt.typeName
 ORDER BY petCount DESC;
 
+
 -- KIEM TRA DU LIEU THIEU (NULL / BANG MO COI)
+
 -- Thu cung chua co ho so benh an
 SELECT p.petID, p.name
 FROM PETS AS p
@@ -75,7 +82,7 @@ FROM MEDICINE
 WHERE expiryDay < CAST(GETDATE() AS DATE)
 ORDER BY expiryDay;
 
---  sap het hang (nguong mau 50 don vi)
+-- Thuoc sap het hang (nguong mau 50 don vi)
 SELECT medicineID, name, quantity, unit
 FROM MEDICINE
 WHERE quantity <= 50
@@ -83,7 +90,6 @@ ORDER BY quantity;
 GO
 
 -- DEM SO DONG CUA TAT CA CAC BANG
--- Doi chieu voi so dong da chen trong PetClinic_Data.sql.
 SELECT 'CUSTOMERS' AS tableName, COUNT(*) AS totalRows FROM CUSTOMERS
 UNION ALL SELECT 'PET_TYPES', COUNT(*) FROM PET_TYPES
 UNION ALL SELECT 'PETS', COUNT(*) FROM PETS
@@ -106,16 +112,4 @@ UNION ALL SELECT 'PAYMENT_METHOD', COUNT(*) FROM PAYMENT_METHOD
 UNION ALL SELECT 'INVOICE', COUNT(*) FROM INVOICE
 UNION ALL SELECT 'PAYMENT', COUNT(*) FROM PAYMENT
 ORDER BY tableName;
-
-
-SELECT doctorID, fullName, CAST(fullName AS VARBINARY(200)) AS raw
-FROM DOCTORS;
-
-UPDATE DOCTORS
-SET fullName = N'BS. Phạm Quốc Dũng',
-    phone    = '0938111222',
-    email    = 'dung.pham@petclinic.vn'
-WHERE doctorID = 1;
-SELECT doctorID, fullName, phone, email, licenseNumber, status
-FROM DOCTORS
-WHERE doctorID IN (1, 3);
+GO
