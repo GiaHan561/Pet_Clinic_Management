@@ -1,4 +1,3 @@
-
 IF DB_ID(N'PetClinic') IS NULL
     CREATE DATABASE PetClinic;
 GO
@@ -9,18 +8,22 @@ GO
 CREATE TABLE CUSTOMERS (
     customerID  INT IDENTITY(1,1) CONSTRAINT PK_CUSTOMERS PRIMARY KEY,
     fullName    NVARCHAR(100) NOT NULL,
-    phone CHAR(10) NOT NULL CHECK (LEN(phone) = 10 AND phone NOT LIKE '%[^0-9]%'),
+    phone       CHAR(10)      NOT NULL,
     email       VARCHAR(100)  NULL,
     address     NVARCHAR(255) NULL,
     createdTime DATETIME2     NOT NULL CONSTRAINT DF_CUSTOMERS_created DEFAULT SYSDATETIME(),
-    CONSTRAINT UQ_CUSTOMERS_phone UNIQUE (phone)
+    CONSTRAINT UQ_CUSTOMERS_phone UNIQUE (phone),
+    CONSTRAINT CK_CUSTOMERS_phone CHECK (phone LIKE '0[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+    CONSTRAINT CK_CUSTOMERS_name CHECK (LEN(LTRIM(RTRIM(fullName))) > 0),
+    CONSTRAINT CK_CUSTOMERS_email CHECK (email IS NULL OR email LIKE '_%@_%._%')
 );
 GO
 
 CREATE TABLE PET_TYPES (
     typeID      INT IDENTITY(1,1) CONSTRAINT PK_PET_TYPES PRIMARY KEY,
     typeName    NVARCHAR(50)  NOT NULL CONSTRAINT UQ_PET_TYPES_name UNIQUE,
-    description NVARCHAR(255) NULL
+    description NVARCHAR(255) NULL,
+    CONSTRAINT CK_PET_TYPES_name CHECK (LEN(LTRIM(RTRIM(typeName))) > 0)
 );
 GO
 
@@ -36,7 +39,10 @@ CREATE TABLE PETS (
     CONSTRAINT FK_PETS_CUSTOMERS FOREIGN KEY (customerID) REFERENCES CUSTOMERS(customerID),
     CONSTRAINT FK_PETS_TYPES     FOREIGN KEY (typeID)     REFERENCES PET_TYPES(typeID),
     CONSTRAINT CK_PETS_gender CHECK (gender IN (N'Đực', N'Cái', N'Male', N'Female', N'Unknown')),
-    CONSTRAINT CK_PETS_weight CHECK (weight IS NULL OR weight > 0)
+    CONSTRAINT CK_PETS_weight CHECK (weight IS NULL OR weight > 0),
+    CONSTRAINT CK_PETS_name CHECK (LEN(LTRIM(RTRIM(name))) > 0),
+    CONSTRAINT CK_PETS_dob CHECK (date_of_birth IS NULL OR date_of_birth <= CAST(GETDATE() AS DATE)),
+    CONSTRAINT CK_PETS_weight_max CHECK (weight IS NULL OR weight <= 200)
 );
 GO
 
@@ -48,7 +54,11 @@ CREATE TABLE DOCTORS (
     licenseNumber VARCHAR(50)   NOT NULL,
     status        NVARCHAR(20)  NOT NULL CONSTRAINT DF_DOCTORS_status DEFAULT N'Active',
     CONSTRAINT UQ_DOCTORS_license UNIQUE (licenseNumber),
-    CONSTRAINT CK_DOCTORS_status CHECK (status IN (N'Active', N'Inactive', N'OnLeave'))
+    CONSTRAINT CK_DOCTORS_status CHECK (status IN (N'Active', N'Inactive', N'OnLeave')),
+    CONSTRAINT CK_DOCTORS_name CHECK (LEN(LTRIM(RTRIM(fullName))) > 0),
+    CONSTRAINT CK_DOCTORS_phone CHECK (phone LIKE '0[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+    CONSTRAINT CK_DOCTORS_email CHECK (email IS NULL OR email LIKE '_%@_%._%'),
+    CONSTRAINT CK_DOCTORS_license CHECK (LEN(LTRIM(RTRIM(licenseNumber))) > 0)
 );
 GO
 
@@ -57,7 +67,8 @@ CREATE TABLE DOCTOR_SPECIALIZATION (
     doctorID       INT           NOT NULL,
     specialization NVARCHAR(100) NOT NULL,
     CONSTRAINT PK_DOCTOR_SPECIALIZATION PRIMARY KEY (doctorID, specialization),
-    CONSTRAINT FK_DOCSPEC_DOCTORS FOREIGN KEY (doctorID) REFERENCES DOCTORS(doctorID) ON DELETE CASCADE
+    CONSTRAINT FK_DOCSPEC_DOCTORS FOREIGN KEY (doctorID) REFERENCES DOCTORS(doctorID) ON DELETE CASCADE,
+    CONSTRAINT CK_DOCSPEC_name CHECK (LEN(LTRIM(RTRIM(specialization))) > 0)
 );
 GO
 
@@ -69,7 +80,8 @@ CREATE TABLE DOCTOR_SCHEDULE (
     endTime     TIME    NOT NULL,
     CONSTRAINT FK_SCHEDULE_DOCTORS FOREIGN KEY (doctorID) REFERENCES DOCTORS(doctorID),
     CONSTRAINT CK_SCHEDULE_day  CHECK (day_of_week BETWEEN 2 AND 8),
-    CONSTRAINT CK_SCHEDULE_time CHECK (endTime > startTime)
+    CONSTRAINT CK_SCHEDULE_time CHECK (endTime > startTime),
+    CONSTRAINT UQ_SCHEDULE_slot UNIQUE (doctorID, day_of_week, startTime)
 );
 GO
 
@@ -108,7 +120,9 @@ CREATE TABLE SERVICES (
     price       DECIMAL(18,2) NOT NULL,
     status      NVARCHAR(20)  NOT NULL CONSTRAINT DF_SERVICES_status DEFAULT N'Active',
     CONSTRAINT CK_SERVICES_price  CHECK (price >= 0),
-    CONSTRAINT CK_SERVICES_status CHECK (status IN (N'Active', N'Inactive'))
+    CONSTRAINT CK_SERVICES_status CHECK (status IN (N'Active', N'Inactive')),
+    CONSTRAINT CK_SERVICES_name CHECK (LEN(LTRIM(RTRIM(serviceName))) > 0),
+    CONSTRAINT UQ_SERVICES_name UNIQUE (serviceName)
 );
 GO
 
@@ -133,7 +147,8 @@ CREATE TABLE VACCINE (
     price        DECIMAL(18,2) NOT NULL,
     rcmInterval  INT           NULL,   -- khoảng cách tiêm nhắc lại (ngày)
     CONSTRAINT CK_VACCINE_price    CHECK (price >= 0),
-    CONSTRAINT CK_VACCINE_interval CHECK (rcmInterval IS NULL OR rcmInterval > 0)
+    CONSTRAINT CK_VACCINE_interval CHECK (rcmInterval IS NULL OR rcmInterval > 0),
+    CONSTRAINT CK_VACCINE_name CHECK (LEN(LTRIM(RTRIM(name))) > 0)
 );
 GO
 
@@ -166,7 +181,9 @@ CREATE TABLE VITAL_SIGN (
     CONSTRAINT FK_VITAL_VISIT FOREIGN KEY (visitID) REFERENCES MEDICAL_VISIT(visitID) ON DELETE CASCADE,
     CONSTRAINT CK_VITAL_weight CHECK (weight IS NULL OR weight > 0),
     CONSTRAINT CK_VITAL_temp   CHECK (temperature IS NULL OR temperature BETWEEN 30 AND 45),
-    CONSTRAINT CK_VITAL_resp   CHECK (respiratoryRate IS NULL OR respiratoryRate > 0)
+    CONSTRAINT CK_VITAL_resp   CHECK (respiratoryRate IS NULL OR respiratoryRate > 0),
+    CONSTRAINT CK_VITAL_weight_max CHECK (weight IS NULL OR weight <= 200),
+    CONSTRAINT CK_VITAL_resp_max CHECK (respiratoryRate IS NULL OR respiratoryRate <= 300)
 );
 GO
 
@@ -177,7 +194,8 @@ CREATE TABLE DIAGNOSIS (
     severity      NVARCHAR(20)  NULL,
     description   NVARCHAR(1000) NULL,
     CONSTRAINT FK_DIAGNOSIS_VISIT FOREIGN KEY (visitID) REFERENCES MEDICAL_VISIT(visitID) ON DELETE CASCADE,
-    CONSTRAINT CK_DIAGNOSIS_severity CHECK (severity IS NULL OR severity IN (N'Mild', N'Moderate', N'Severe', N'Critical'))
+    CONSTRAINT CK_DIAGNOSIS_severity CHECK (severity IS NULL OR severity IN (N'Mild', N'Moderate', N'Severe', N'Critical')),
+    CONSTRAINT CK_DIAGNOSIS_name CHECK (LEN(LTRIM(RTRIM(diagnosisName))) > 0)
 );
 GO
 
@@ -191,7 +209,8 @@ CREATE TABLE MEDICINE (
     price       DECIMAL(18,2) NOT NULL,
     expiryDay   DATE          NULL,
     CONSTRAINT CK_MEDICINE_qty   CHECK (quantity >= 0),
-    CONSTRAINT CK_MEDICINE_price CHECK (price >= 0)
+    CONSTRAINT CK_MEDICINE_price CHECK (price >= 0),
+    CONSTRAINT CK_MEDICINE_name CHECK (LEN(LTRIM(RTRIM(name))) > 0)
 );
 GO
 
@@ -200,7 +219,8 @@ CREATE TABLE MEDICINE_CATEGORY (
     medicineID INT           NOT NULL,
     category   NVARCHAR(100) NOT NULL,
     CONSTRAINT PK_MEDICINE_CATEGORY PRIMARY KEY (medicineID, category),
-    CONSTRAINT FK_MEDCAT_MEDICINE FOREIGN KEY (medicineID) REFERENCES MEDICINE(medicineID) ON DELETE CASCADE
+    CONSTRAINT FK_MEDCAT_MEDICINE FOREIGN KEY (medicineID) REFERENCES MEDICINE(medicineID) ON DELETE CASCADE,
+    CONSTRAINT CK_MEDCAT_category CHECK (LEN(LTRIM(RTRIM(category))) > 0)
 );
 GO
 
@@ -236,7 +256,8 @@ GO
 CREATE TABLE PAYMENT_METHOD (
     paymentMethodID INT IDENTITY(1,1) CONSTRAINT PK_PAYMENT_METHOD PRIMARY KEY,
     typeName        NVARCHAR(50)  NOT NULL CONSTRAINT UQ_PAYMETHOD_name UNIQUE,
-    description     NVARCHAR(255) NULL
+    description     NVARCHAR(255) NULL,
+    CONSTRAINT CK_PAYMETHOD_name CHECK (LEN(LTRIM(RTRIM(typeName))) > 0)
 );
 GO
 
@@ -276,4 +297,14 @@ CREATE INDEX IX_APPOINTMENT_doctor    ON APPOINTMENT(doctorID, appointmentDate);
 CREATE INDEX IX_VISIT_record          ON MEDICAL_VISIT(recordID);
 CREATE INDEX IX_INVOICE_customer      ON INVOICE(customerID);
 CREATE INDEX IX_PAYMENT_invoice       ON PAYMENT(invoiceID);
+GO
+
+-- Chống trùng lịch hẹn (index lọc: chỉ áp dụng cho lịch còn hiệu lực)
+CREATE UNIQUE INDEX UX_APPT_doctor_slot
+ON APPOINTMENT(doctorID, appointmentDate, appointmentTime)
+WHERE status <> N'Cancelled' AND status <> N'NoShow';
+GO
+CREATE UNIQUE INDEX UX_APPT_pet_slot
+ON APPOINTMENT(petID, appointmentDate, appointmentTime)
+WHERE status <> N'Cancelled' AND status <> N'NoShow';
 GO

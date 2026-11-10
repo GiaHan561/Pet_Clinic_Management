@@ -58,7 +58,7 @@ public class CustomerPanel extends javax.swing.JPanel {
     private static final Color DISABLED = new Color(208, 213, 223);
     private int hoveredCustomerRow = -1;
 
-    private static final Pattern PHONE_REGEX = Pattern.compile("^\\d{10}$");
+    private static final Pattern PHONE_REGEX = Pattern.compile("^0\\d{9}$");
     private static final Pattern EMAIL_REGEX =
             Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$");
     private static final DateTimeFormatter TIME_FMT =
@@ -423,7 +423,7 @@ public class CustomerPanel extends javax.swing.JPanel {
             return false;
         }
         if (!PHONE_REGEX.matcher(phone).matches()) {
-            message("Số điện thoại phải gồm đúng 10 chữ số.");
+            message("Số điện thoại không hợp lệ (phải gồm 10 chữ số và bắt đầu bằng 0).");
             txtPhone.requestFocus();
             return false;
         }
@@ -496,10 +496,9 @@ public class CustomerPanel extends javax.swing.JPanel {
     private void showError(SQLException ex) {
         String message = ex.getMessage();
 
-        if (ex.getErrorCode() == 547
-                && message != null
+        if (ex.getErrorCode() == 547 && message != null 
                 && message.contains("CK_CUSTOMERS_phone")) {
-            message = "Số điện thoại phải gồm đúng 10 chữ số.";
+            message = "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.";
         } else if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
             message = "Số điện thoại hoặc email này đã tồn tại trong hệ thống.";
         }
