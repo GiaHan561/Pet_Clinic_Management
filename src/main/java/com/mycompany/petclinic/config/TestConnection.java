@@ -1,36 +1,24 @@
+
 package com.mycompany.petclinic.config;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
 
 public class TestConnection {
-    public static void main(String[] args) {
-        String sql = "SELECT TOP 5 * FROM CUSTOMERS";
 
-        try (
-            Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-        ) {
+    public static void main(String[] args) {
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
 
             System.out.println("KET NOI THANH CONG!");
-            System.out.println("Database: " + conn.getCatalog());
-            System.out.println("-----------------------------");
-            System.out.println("DU LIEU CUSTOMERS:");
 
-            while (rs.next()) {
-                System.out.println(
-                    rs.getInt("customerID") + " | " +
-                    rs.getString("fullName") + " | " +
-                    rs.getString("phone") + " | " +
-                    rs.getString("email") + " | " +
-                    rs.getString("address") + " | " +
-                    rs.getString("createdTime")
-                );
-            }
+            DatabaseMetaData meta = conn.getMetaData();
+
+            System.out.println("Database: " + conn.getCatalog());
+            System.out.println("SQL Server: " + meta.getDatabaseProductVersion());
+
         } catch (Exception e) {
-            System.out.println("KET NOI HOAC TRUY VAN THAT BAI!");
+            System.out.println("KET NOI THAT BAI!");
             e.printStackTrace();
         }
     }

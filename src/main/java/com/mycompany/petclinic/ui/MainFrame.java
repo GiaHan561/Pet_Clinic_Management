@@ -2,6 +2,7 @@ package com.mycompany.petclinic.ui;
 
 import com.mycompany.petclinic.ui.customer.CustomerPanel;
 import com.mycompany.petclinic.ui.pet.PetPanel;
+import com.mycompany.petclinic.ui.medical.MedicalRecordPanel;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -78,6 +79,7 @@ public class MainFrame extends JFrame {
 
         registerPanel(KEY_WELCOME, createWelcomePanel());
         registerPanel(KEY_DASHBOARD, dashboardPanel);
+        registerPanel(KEY_MEDICAL, new MedicalRecordPanel());
 
         PetPanel petPanel = new PetPanel();
 
