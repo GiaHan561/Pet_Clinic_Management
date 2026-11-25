@@ -484,8 +484,8 @@ public class CustomerPanel extends javax.swing.JPanel {
     private void setSelectedMode(boolean selected) {
         btnAdd.setEnabled(!selected);
         btnUpdate.setEnabled(selected);
-        txtName.setEditable(!selected);
-        txtName.setBackground(selected ? READONLY : Color.WHITE);
+        txtName.setEditable(true);
+        txtName.setBackground(Color.WHITE);
     }
 
     private String cell(int row, int col) {

@@ -53,21 +53,22 @@ public class CustomerDAO {
         }
     }
 
-    // 3. Cập nhật SĐT, email, địa chỉ theo mã khách hàng
+    // 3. Cập nhật họ tên, SĐT, email, địa chỉ theo mã khách hàng
     public boolean update(Customer c) throws SQLException {
         String sql = """
             UPDATE CUSTOMERS
-            SET phone = ?, email = ?, address = ?
+            SET fullName = ?, phone = ?, email = ?, address = ?
             WHERE customerID = ?
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, c.getPhone());
-            ps.setString(2, c.getEmail());
-            ps.setString(3, c.getAddress());
-            ps.setInt(4, c.getCustomerID());
+            ps.setString(1, c.getFullName());
+            ps.setString(2, c.getPhone());
+            ps.setString(3, c.getEmail());
+            ps.setString(4, c.getAddress());
+            ps.setInt(5, c.getCustomerID());
 
             return ps.executeUpdate() == 1;
         }
