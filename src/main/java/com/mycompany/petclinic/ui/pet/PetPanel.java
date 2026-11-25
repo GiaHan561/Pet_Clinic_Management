@@ -662,14 +662,28 @@ public class PetPanel extends javax.swing.JPanel {
     }
 
     private void showError(SQLException ex) {
-        String msg = ex.getMessage();
-        if (ex.getErrorCode() == 547) {
-            msg = "Dữ liệu vi phạm ràng buộc của cơ sở dữ liệu "
-                    + "(giới tính, cân nặng, mã khách hàng hoặc loài không hợp lệ).\n" + msg;
-        } else if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
-            msg = "Dữ liệu bị trùng (ví dụ tên loài đã tồn tại).\n" + msg;
+        String msg;
+
+        if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
+            msg = "Thông tin đã tồn tại trong hệ thống.";
+            if (ex.getMessage() != null
+                    && ex.getMessage().contains("UQ_PET_TYPES_name")) {
+                msg = "Tên loài này đã tồn tại.\n"
+                    + "Vui lòng sử dụng loài có sẵn hoặc nhập tên khác.";
+            }
+        } else if (ex.getErrorCode() == 547) {
+            msg = "Thông tin chưa hợp lệ.\n"
+                + "Vui lòng kiểm tra giới tính, cân nặng, mã khách hàng và loài.";
+        } else {
+            msg = "Không thể thực hiện thao tác.\n"
+                + "Vui lòng thử lại hoặc kiểm tra kết nối cơ sở dữ liệu.";
         }
-        JOptionPane.showMessageDialog(this, msg, "Lỗi SQL Server", JOptionPane.ERROR_MESSAGE);
+
+        ex.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+            this, msg, "Thông báo", JOptionPane.WARNING_MESSAGE
+        );
     }
 
     /**
