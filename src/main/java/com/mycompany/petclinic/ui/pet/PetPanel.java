@@ -430,11 +430,29 @@ public class PetPanel extends javax.swing.JPanel {
             return;
         }
         try {
-            // Schema hiện tại chỉ cho cập nhật cân nặng và ghi chú.
-            selectedPet.setWeight(parseWeight());
-            selectedPet.setNote(optional(txtNote.getText()));
-            if (petDAO.update(selectedPet)) {
-                message("Đã cập nhật cân nặng và ghi chú.");
+            String name = txtName.getText().trim();
+            if (name.isEmpty() || name.length() > 100) {
+                message("Tên thú cưng phải có từ 1 đến 100 ký tự.");
+                txtName.requestFocusInWindow();
+                return;
+            }
+            PetType type = (PetType) cbType.getSelectedItem();
+            if (type == null) {
+                message("Vui lòng chọn loài thú cưng.");
+                cbType.requestFocusInWindow();
+                return;
+            }
+            String gender = gender();
+            if (gender == null || gender.isBlank()) {
+                message("Vui lòng chọn giới tính thú cưng.");
+                cbGender.requestFocusInWindow();
+                return;
+            }
+            Pet updatedPet = new Pet(selectedPet.getPetID(),
+                    selectedPet.getCustomerID(), type.getTypeID(), name,
+                    gender, parseDate(), parseWeight(), optional(txtNote.getText()));
+            if (petDAO.update(updatedPet)) {
+                message("Đã cập nhật thông tin thú cưng.");
                 loadPets();
                 clearFields();
             } else {
@@ -630,12 +648,14 @@ public class PetPanel extends javax.swing.JPanel {
     private void setSelectedMode(boolean selected) {
         btnAdd.setEnabled(!selected);
         btnUpdate.setEnabled(selected);
+        txtCustomer.setEditable(!selected);
+        txtCustomer.setBackground(selected ? READONLY : Color.WHITE);
         for (JTextField f : new JTextField[]{txtName, txtBirth}) {
-            f.setEditable(!selected);
-            f.setBackground(selected ? READONLY : Color.WHITE);
+            f.setEditable(true);
+            f.setBackground(Color.WHITE);
         }
-        cbType.setEnabled(!selected);
-        cbGender.setEnabled(!selected);
+        cbType.setEnabled(true);
+        cbGender.setEnabled(true);
     }
 
     private void clearFields() {

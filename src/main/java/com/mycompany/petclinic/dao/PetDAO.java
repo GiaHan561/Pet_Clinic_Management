@@ -104,21 +104,30 @@ public class PetDAO {
         return list;
     }
 
-    // 4. Cập nhật cân nặng và ghi chú sức khỏe
+    // 4. Cập nhật thông tin thú cưng, giữ nguyên mã và chủ nuôi
     public boolean update(Pet pet) throws SQLException {
 
         String sql = """
             UPDATE PETS
-            SET weight = ?, note = ?
+            SET typeID = ?, name = ?, gender = ?, date_of_birth = ?,
+                weight = ?, note = ?
             WHERE petID = ?
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setBigDecimal(1, pet.getWeight());
-            ps.setString(2, pet.getNote());
-            ps.setInt(3, pet.getPetID());
+            ps.setInt(1, pet.getTypeID());
+            ps.setString(2, pet.getName());
+            ps.setString(3, pet.getGender());
+            if (pet.getDateOfBirth() == null) {
+                ps.setNull(4, Types.DATE);
+            } else {
+                ps.setDate(4, java.sql.Date.valueOf(pet.getDateOfBirth()));
+            }
+            ps.setBigDecimal(5, pet.getWeight());
+            ps.setString(6, pet.getNote());
+            ps.setInt(7, pet.getPetID());
 
             return ps.executeUpdate() == 1;
         }
