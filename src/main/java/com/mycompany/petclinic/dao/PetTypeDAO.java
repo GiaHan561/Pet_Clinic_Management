@@ -31,6 +31,17 @@ public class PetTypeDAO {
         }
     }
 
+    public boolean update(PetType type) throws SQLException {
+        String sql = "UPDATE PET_TYPES SET typeName = ?, description = ? WHERE typeID = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, type.getTypeName());
+            ps.setString(2, type.getDescription());
+            ps.setInt(3, type.getTypeID());
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     // 2. Lấy danh sách các loài
     public List<PetType> findAll() throws SQLException {
 

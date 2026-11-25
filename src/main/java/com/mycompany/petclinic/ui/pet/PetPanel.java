@@ -135,7 +135,8 @@ public class PetPanel extends javax.swing.JPanel {
         btnSearch.addActionListener(e -> searchPets());
         btnUpdate.addActionListener(e -> updatePet());
         btnAll.addActionListener(e -> loadPets());
-        btnType.addActionListener(e -> addType());
+        btnType.setText("Quản lý loài");
+        btnType.addActionListener(e -> manageType());
         btnStats.addActionListener(e -> showStats());
         btnClear.addActionListener(e -> clearFields());
         tblData.getSelectionModel().addListSelectionListener(e -> {
@@ -368,8 +369,22 @@ public class PetPanel extends javax.swing.JPanel {
                 message("Chọn loài hoặc thêm loài mới trước.");
                 return;
             }
-            Pet p = new Pet(customerId, type.getTypeID(), name,
-                    gender(), parseDate(), parseWeight(), optional(txtNote.getText()));
+            String gioiTinh = gender();
+
+            if (gioiTinh == null || gioiTinh.isBlank()) {
+                message("Vui lòng chọn giới tính thú cưng.");
+                cbGender.requestFocusInWindow();
+                return;
+            }
+            Pet p = new Pet(
+                    customerId,
+                    type.getTypeID(),
+                    name,
+                    gioiTinh,
+                    parseDate(),
+                    parseWeight(),
+                    optional(txtNote.getText())
+            );
             if (petDAO.insert(p)) {
                 message("Đăng ký thú cưng thành công.");
                 loadPets();
@@ -416,11 +431,29 @@ public class PetPanel extends javax.swing.JPanel {
             return;
         }
         try {
-            // Schema hiện tại chỉ cho cập nhật cân nặng và ghi chú.
-            selectedPet.setWeight(parseWeight());
-            selectedPet.setNote(optional(txtNote.getText()));
-            if (petDAO.update(selectedPet)) {
-                message("Đã cập nhật cân nặng và ghi chú.");
+            String name = txtName.getText().trim();
+            if (name.isEmpty() || name.length() > 100) {
+                message("Tên thú cưng phải có từ 1 đến 100 ký tự.");
+                txtName.requestFocusInWindow();
+                return;
+            }
+            PetType type = (PetType) cbType.getSelectedItem();
+            if (type == null) {
+                message("Vui lòng chọn loài thú cưng.");
+                cbType.requestFocusInWindow();
+                return;
+            }
+            String gender = gender();
+            if (gender == null || gender.isBlank()) {
+                message("Vui lòng chọn giới tính thú cưng.");
+                cbGender.requestFocusInWindow();
+                return;
+            }
+            Pet updatedPet = new Pet(selectedPet.getPetID(),
+                    selectedPet.getCustomerID(), type.getTypeID(), name,
+                    gender, parseDate(), parseWeight(), optional(txtNote.getText()));
+            if (petDAO.update(updatedPet)) {
+                message("Đã cập nhật thông tin thú cưng.");
                 loadPets();
                 clearFields();
             } else {
@@ -430,6 +463,90 @@ public class PetPanel extends javax.swing.JPanel {
             showError(ex);
         } catch (IllegalArgumentException ex) {
             message(ex.getMessage());
+        }
+    }
+
+    private void manageType() {
+        int action = JOptionPane.showOptionDialog(this,
+                "Chọn thao tác với loài thú cưng.", "Quản lý loài",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, new String[]{"Thêm loài", "Cập nhật loài", "Hủy"}, "Thêm loài");
+        if (action == 0) {
+            addType();
+        } else if (action == 1) {
+            updateType();
+        }
+    }
+
+    private void updateType() {
+        try {
+            List<PetType> types = typeDAO.findAll();
+            if (types.isEmpty()) {
+                message("Chưa có loài để cập nhật.");
+                return;
+            }
+            PetType type = (PetType) JOptionPane.showInputDialog(this,
+                    "Chọn loài cần sửa:", "Cập nhật loài",
+                    JOptionPane.QUESTION_MESSAGE, null,
+                    types.toArray(new PetType[0]), types.get(0));
+            if (type == null) {
+                return;
+            }
+            JTextField name = new JTextField(type.getTypeName(), 24);
+            JTextField description = new JTextField(
+                    type.getDescription() == null ? "" : type.getDescription(), 24);
+            styleField(name);
+            styleField(description);
+            name.addAncestorListener(new javax.swing.event.AncestorListener() {
+                public void ancestorAdded(javax.swing.event.AncestorEvent e) {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        name.requestFocusInWindow();
+                        name.selectAll();
+                    });
+                }
+                public void ancestorRemoved(javax.swing.event.AncestorEvent e) { }
+                public void ancestorMoved(javax.swing.event.AncestorEvent e) { }
+            });
+            JPanel form = new JPanel(new GridLayout(0, 1, 0, 6));
+            form.add(new JLabel("Tên loài (tối đa 50 ký tự):"));
+            form.add(name);
+            form.add(new JLabel("Mô tả (tối đa 255 ký tự):"));
+            form.add(description);
+            while (JOptionPane.showConfirmDialog(this, form, "Cập nhật loài",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE)
+                    == JOptionPane.OK_OPTION) {
+                String n = name.getText().trim();
+                String d = description.getText().trim();
+                if (n.isEmpty() || n.length() > 50 || d.length() > 255) {
+                    message("Tên loài phải có từ 1 đến 50 ký tự.\nMô tả tối đa 255 ký tự.");
+                    continue;
+                }
+                try {
+                    if (!typeDAO.update(new PetType(type.getTypeID(), n,
+                            d.isEmpty() ? null : d))) {
+                        message("Loài này không còn tồn tại. Vui lòng tải lại danh sách.");
+                        return;
+                    }
+                } catch (SQLException ex) {
+                    if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
+                        message("Tên loài này đã tồn tại. Vui lòng nhập tên khác.");
+                        continue;
+                    }
+                    throw ex;
+                }
+                loadTypes();
+                loadPets();
+                for (int i = 0; i < cbType.getItemCount(); i++) {
+                    if (cbType.getItemAt(i).getTypeID() == type.getTypeID()) {
+                        cbType.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                message("Đã cập nhật tên và mô tả loài.");
+                return;
+            }
+        } catch (SQLException ex) {
+            showError(ex);
         }
     }
 
@@ -616,12 +733,14 @@ public class PetPanel extends javax.swing.JPanel {
     private void setSelectedMode(boolean selected) {
         btnAdd.setEnabled(!selected);
         btnUpdate.setEnabled(selected);
+        txtCustomer.setEditable(!selected);
+        txtCustomer.setBackground(selected ? READONLY : Color.WHITE);
         for (JTextField f : new JTextField[]{txtName, txtBirth}) {
-            f.setEditable(!selected);
-            f.setBackground(selected ? READONLY : Color.WHITE);
+            f.setEditable(true);
+            f.setBackground(Color.WHITE);
         }
-        cbType.setEnabled(!selected);
-        cbGender.setEnabled(!selected);
+        cbType.setEnabled(true);
+        cbGender.setEnabled(true);
     }
 
     private void clearFields() {
