@@ -482,7 +482,7 @@ public class PetPanel extends javax.swing.JPanel {
         try {
             Map<String, Integer> counts = petDAO.countByType();
             DefaultTableModel stats = new DefaultTableModel(
-                    new String[]{"Tên loài", "Số thú cưng"}, 0) {
+                    new String[]{"Tên loài", "Số thú cưng", "Mô tả loài"}, 0) {
                 @Override
                 public boolean isCellEditable(int r, int c) {
                     return false;
@@ -493,15 +493,19 @@ public class PetPanel extends javax.swing.JPanel {
                     return c == 1 ? Integer.class : String.class;
                 }
             };
-            for (Map.Entry<String, Integer> item : counts.entrySet()) {
-                stats.addRow(new Object[]{item.getKey(), item.getValue()});
+            for (PetType type : typeDAO.findAll()) {
+                stats.addRow(new Object[]{
+                    type.getTypeName(),
+                    counts.getOrDefault(type.getTypeName(), 0),
+                    type.getDescription() == null ? "" : type.getDescription()
+                });
             }
             JTable table = new JTable(stats);
             styleTable(table);
             JScrollPane scroll = new JScrollPane(table);
             scroll.setBorder(BorderFactory.createLineBorder(LINE, 1, true));
             scroll.getViewport().setBackground(Color.WHITE);
-            scroll.setPreferredSize(new Dimension(420, 240));
+            scroll.setPreferredSize(new Dimension(720, 300));
 
             JLabel total = new JLabel("Tổng số thú cưng: " + petDAO.countAll());
             total.setFont(new Font(FONT, Font.BOLD, 16));
