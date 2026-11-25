@@ -135,7 +135,8 @@ public class PetPanel extends javax.swing.JPanel {
         btnSearch.addActionListener(e -> searchPets());
         btnUpdate.addActionListener(e -> updatePet());
         btnAll.addActionListener(e -> loadPets());
-        btnType.addActionListener(e -> addType());
+        btnType.setText("Quản lý loài");
+        btnType.addActionListener(e -> manageType());
         btnStats.addActionListener(e -> showStats());
         btnClear.addActionListener(e -> clearFields());
         tblData.getSelectionModel().addListSelectionListener(e -> {
@@ -462,6 +463,90 @@ public class PetPanel extends javax.swing.JPanel {
             showError(ex);
         } catch (IllegalArgumentException ex) {
             message(ex.getMessage());
+        }
+    }
+
+    private void manageType() {
+        int action = JOptionPane.showOptionDialog(this,
+                "Chọn thao tác với loài thú cưng.", "Quản lý loài",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, new String[]{"Thêm loài", "Cập nhật loài", "Hủy"}, "Thêm loài");
+        if (action == 0) {
+            addType();
+        } else if (action == 1) {
+            updateType();
+        }
+    }
+
+    private void updateType() {
+        try {
+            List<PetType> types = typeDAO.findAll();
+            if (types.isEmpty()) {
+                message("Chưa có loài để cập nhật.");
+                return;
+            }
+            PetType type = (PetType) JOptionPane.showInputDialog(this,
+                    "Chọn loài cần sửa:", "Cập nhật loài",
+                    JOptionPane.QUESTION_MESSAGE, null,
+                    types.toArray(new PetType[0]), types.get(0));
+            if (type == null) {
+                return;
+            }
+            JTextField name = new JTextField(type.getTypeName(), 24);
+            JTextField description = new JTextField(
+                    type.getDescription() == null ? "" : type.getDescription(), 24);
+            styleField(name);
+            styleField(description);
+            name.addAncestorListener(new javax.swing.event.AncestorListener() {
+                public void ancestorAdded(javax.swing.event.AncestorEvent e) {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        name.requestFocusInWindow();
+                        name.selectAll();
+                    });
+                }
+                public void ancestorRemoved(javax.swing.event.AncestorEvent e) { }
+                public void ancestorMoved(javax.swing.event.AncestorEvent e) { }
+            });
+            JPanel form = new JPanel(new GridLayout(0, 1, 0, 6));
+            form.add(new JLabel("Tên loài (tối đa 50 ký tự):"));
+            form.add(name);
+            form.add(new JLabel("Mô tả (tối đa 255 ký tự):"));
+            form.add(description);
+            while (JOptionPane.showConfirmDialog(this, form, "Cập nhật loài",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE)
+                    == JOptionPane.OK_OPTION) {
+                String n = name.getText().trim();
+                String d = description.getText().trim();
+                if (n.isEmpty() || n.length() > 50 || d.length() > 255) {
+                    message("Tên loài phải có từ 1 đến 50 ký tự.\nMô tả tối đa 255 ký tự.");
+                    continue;
+                }
+                try {
+                    if (!typeDAO.update(new PetType(type.getTypeID(), n,
+                            d.isEmpty() ? null : d))) {
+                        message("Loài này không còn tồn tại. Vui lòng tải lại danh sách.");
+                        return;
+                    }
+                } catch (SQLException ex) {
+                    if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
+                        message("Tên loài này đã tồn tại. Vui lòng nhập tên khác.");
+                        continue;
+                    }
+                    throw ex;
+                }
+                loadTypes();
+                loadPets();
+                for (int i = 0; i < cbType.getItemCount(); i++) {
+                    if (cbType.getItemAt(i).getTypeID() == type.getTypeID()) {
+                        cbType.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                message("Đã cập nhật tên và mô tả loài.");
+                return;
+            }
+        } catch (SQLException ex) {
+            showError(ex);
         }
     }
 
