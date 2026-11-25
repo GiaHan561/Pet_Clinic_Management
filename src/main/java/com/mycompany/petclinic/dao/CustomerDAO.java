@@ -110,6 +110,27 @@ public class CustomerDAO {
         }
     }
 
+public boolean existsByEmail(String email, int excludedCustomerId) throws SQLException {
+    String sql = """
+        SELECT 1
+        FROM CUSTOMERS
+        WHERE LOWER(LTRIM(RTRIM(email))) = LOWER(?)
+          AND customerID <> ?
+        """;
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, email.trim());
+        ps.setInt(2, excludedCustomerId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    }
+}
+
+
    // Chuyển một dòng ResultSet thành đối tượng Customer
     private Customer map(ResultSet rs) throws SQLException {
 

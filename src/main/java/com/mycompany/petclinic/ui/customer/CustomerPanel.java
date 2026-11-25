@@ -356,6 +356,10 @@ public class CustomerPanel extends javax.swing.JPanel {
                 txtPhone.requestFocus();
                 return;
             }
+            if (!validUniqueEmail(0)) {
+                return;
+            }
+            
             
             int id = dao.insert(customer);
             if (id > 0) {
@@ -405,6 +409,9 @@ public class CustomerPanel extends javax.swing.JPanel {
                 optional(txtEmail.getText()), optional(txtAddress.getText()));
         c.setCustomerID(Integer.parseInt(txtID.getText()));
         try {
+            if (!validUniqueEmail(c.getCustomerID())) {
+                return;
+            }
             if (dao.update(c)) {
                 message("Cập nhật thành công.");
                 loadCustomers();
@@ -415,6 +422,18 @@ public class CustomerPanel extends javax.swing.JPanel {
         } catch (SQLException ex) {
             showError(ex);
         }
+    }
+    private boolean validUniqueEmail(int customerId) throws SQLException {
+        String email = txtEmail.getText().trim();
+
+        if (!email.isEmpty() && dao.existsByEmail(email, customerId)) {
+            message("Email này đã được khách hàng khác sử dụng.\n"
+                    + "Vui lòng nhập email khác.");
+            txtEmail.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private boolean valid() {
