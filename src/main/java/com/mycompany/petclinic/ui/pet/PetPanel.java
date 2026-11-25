@@ -439,42 +439,86 @@ public class PetPanel extends javax.swing.JPanel {
         styleField(name);
         styleField(description);
 
-        JLabel l1 = new JLabel("Tên loài (tối đa 50 ký tự):");
-        JLabel l2 = new JLabel("Mô tả (tối đa 255 ký tự):");
-        for (JLabel l : new JLabel[]{l1, l2}) {
-            l.setFont(new Font(FONT, Font.BOLD, 13));
-            l.setForeground(LABEL);
-        }
         JPanel form = new JPanel(new GridLayout(0, 1, 0, 6));
-        form.add(l1);
+        form.add(new JLabel("Tên loài (tối đa 50 ký tự):"));
         form.add(name);
-        form.add(l2);
+        form.add(new JLabel("Mô tả (tối đa 255 ký tự):"));
         form.add(description);
 
-        if (JOptionPane.showConfirmDialog(this, form, "Thêm loài mới",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) {
-            return;
-        }
-        String n = name.getText().trim();
-        String d = description.getText().trim();
-        if (n.isEmpty() || n.length() > 50 || d.length() > 255) {
-            message("Tên loài: 1–50 ký tự; mô tả: tối đa 255 ký tự.");
-            return;
-        }
-        try {
-            if (typeDAO.insert(new PetType(n, d.isEmpty() ? null : d))) {
+        // Đưa con trỏ về tên loài mỗi khi form được mở lại.
+        name.addAncestorListener(new javax.swing.event.AncestorListener() {
+            @Override
+            public void ancestorAdded(javax.swing.event.AncestorEvent e) {
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    name.requestFocusInWindow();
+                    name.selectAll();
+                });
+            }
+
+            @Override
+            public void ancestorRemoved(javax.swing.event.AncestorEvent e) {
+            }
+
+            @Override
+            public void ancestorMoved(javax.swing.event.AncestorEvent e) {
+            }
+        });
+
+        while (true) {
+            int choice = JOptionPane.showConfirmDialog(
+                    this, form, "Thêm loài mới",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
+
+            if (choice != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            String n = name.getText().trim();
+            String d = description.getText().trim();
+
+            if (n.isEmpty() || n.length() > 50 || d.length() > 255) {
+                message("Tên loài phải có từ 1 đến 50 ký tự.\n"
+                        + "Mô tả không được quá 255 ký tự.");
+                continue;
+            }
+
+            try {
+                if (!typeDAO.insert(new PetType(
+                        n, d.isEmpty() ? null : d))) {
+                    message("Chưa thêm được loài. Vui lòng thử lại.");
+                    continue;
+                }
+
                 message("Đã thêm loài.");
                 loadTypes();
-                for (int i = 0; i < cbType.getItemCount(); i++) {   // chọn sẵn loài vừa thêm
+
+                for (int i = 0; i < cbType.getItemCount(); i++) {
                     if (cbType.getItemAt(i).getTypeName().equals(n)) {
                         cbType.setSelectedIndex(i);
                         break;
                     }
                 }
-                loadPets();   // cập nhật tên loài hiển thị trong bảng
+
+                loadPets();
+                return;
+
+            } catch (SQLException ex) {
+                if (ex.getErrorCode() == 2627
+                        || ex.getErrorCode() == 2601) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Tên loài này đã tồn tại.\n"
+                                    + "Vui lòng nhập tên khác.",
+                            "Thông báo",
+                            JOptionPane.WARNING_MESSAGE);
+                    // Lặp lại để mở form và chọn ô tên loài.
+                    continue;
+                }
+
+                showError(ex);
+                return;
             }
-        } catch (SQLException ex) {
-            showError(ex);
         }
     }
 
@@ -662,14 +706,28 @@ public class PetPanel extends javax.swing.JPanel {
     }
 
     private void showError(SQLException ex) {
-        String msg = ex.getMessage();
-        if (ex.getErrorCode() == 547) {
-            msg = "Dữ liệu vi phạm ràng buộc của cơ sở dữ liệu "
-                    + "(giới tính, cân nặng, mã khách hàng hoặc loài không hợp lệ).\n" + msg;
-        } else if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
-            msg = "Dữ liệu bị trùng (ví dụ tên loài đã tồn tại).\n" + msg;
+        String msg;
+
+        if (ex.getErrorCode() == 2627 || ex.getErrorCode() == 2601) {
+            msg = "Thông tin đã tồn tại trong hệ thống.";
+            if (ex.getMessage() != null
+                    && ex.getMessage().contains("UQ_PET_TYPES_name")) {
+                msg = "Tên loài này đã tồn tại.\n"
+                    + "Vui lòng sử dụng loài có sẵn hoặc nhập tên khác.";
+            }
+        } else if (ex.getErrorCode() == 547) {
+            msg = "Thông tin chưa hợp lệ.\n"
+                + "Vui lòng kiểm tra giới tính, cân nặng, mã khách hàng và loài.";
+        } else {
+            msg = "Không thể thực hiện thao tác.\n"
+                + "Vui lòng thử lại hoặc kiểm tra kết nối cơ sở dữ liệu.";
         }
-        JOptionPane.showMessageDialog(this, msg, "Lỗi SQL Server", JOptionPane.ERROR_MESSAGE);
+
+        ex.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+            this, msg, "Thông báo", JOptionPane.WARNING_MESSAGE
+        );
     }
 
     /**
