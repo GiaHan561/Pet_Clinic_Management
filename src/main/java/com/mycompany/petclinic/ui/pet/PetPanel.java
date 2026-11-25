@@ -368,8 +368,22 @@ public class PetPanel extends javax.swing.JPanel {
                 message("Chọn loài hoặc thêm loài mới trước.");
                 return;
             }
-            Pet p = new Pet(customerId, type.getTypeID(), name,
-                    gender(), parseDate(), parseWeight(), optional(txtNote.getText()));
+            String gioiTinh = gender();
+
+            if (gioiTinh == null || gioiTinh.isBlank()) {
+                message("Vui lòng chọn giới tính thú cưng.");
+                cbGender.requestFocusInWindow();
+                return;
+            }
+            Pet p = new Pet(
+                    customerId,
+                    type.getTypeID(),
+                    name,
+                    gioiTinh,
+                    parseDate(),
+                    parseWeight(),
+                    optional(txtNote.getText())
+            );
             if (petDAO.insert(p)) {
                 message("Đăng ký thú cưng thành công.");
                 loadPets();
