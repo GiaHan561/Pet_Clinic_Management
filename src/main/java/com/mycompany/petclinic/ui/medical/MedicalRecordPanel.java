@@ -70,7 +70,9 @@ public class MedicalRecordPanel extends JPanel {
     private JButton btnAdd, btnSearch, btnClear;
     private JScrollPane scrollTable;
     private JTable tblData;
-
+        private void openDetail(MedicalRecord record) {
+            new MedicalRecordDetailFrame(record, this).setVisible(true);
+        }
     public MedicalRecordPanel() {
         initComponents();
         initTable();
@@ -178,7 +180,18 @@ public class MedicalRecordPanel extends JPanel {
                 selectRow();
             }
         });
-
+        tblData.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1 || e.getClickCount() != 2) {
+                    return;
+                }
+                int viewRow = tblData.rowAtPoint(e.getPoint());
+                if (viewRow >= 0) {
+                    openDetail(currentRecords.get(tblData.convertRowIndexToModel(viewRow)));
+                }
+            }
+        });
         MouseAdapter hover = new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
