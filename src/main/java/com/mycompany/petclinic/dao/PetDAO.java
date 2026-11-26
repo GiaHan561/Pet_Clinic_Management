@@ -18,6 +18,34 @@ import java.util.Map;
 
 public class PetDAO {
 
+    // Chỉ phát hiện thông tin tương tự để cảnh báo, không chặn đăng ký.
+    public boolean existsSimilar(Pet pet) throws SQLException {
+        String sql = """
+            SELECT TOP 1 1
+            FROM PETS
+            WHERE customerID = ? AND typeID = ?
+              AND LOWER(LTRIM(RTRIM(name))) = LOWER(?)
+              AND (date_of_birth = ? OR (date_of_birth IS NULL AND ? IS NULL))
+            """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, pet.getCustomerID());
+            ps.setInt(2, pet.getTypeID());
+            ps.setString(3, pet.getName().trim());
+            if (pet.getDateOfBirth() == null) {
+                ps.setNull(4, Types.DATE);
+                ps.setNull(5, Types.DATE);
+            } else {
+                java.sql.Date birth = java.sql.Date.valueOf(pet.getDateOfBirth());
+                ps.setDate(4, birth);
+                ps.setDate(5, birth);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     // 1. Đăng ký thú cưng
     public boolean insert(Pet pet) throws SQLException {
 

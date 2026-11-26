@@ -385,6 +385,20 @@ public class PetPanel extends javax.swing.JPanel {
                     parseWeight(),
                     optional(txtNote.getText())
             );
+            if (petDAO.existsSimilar(p)) {
+                String detail = p.getDateOfBirth() == null
+                        ? "Đã có thú cưng cùng chủ, tên và loài, cũng chưa có ngày sinh."
+                        : "Đã có thú cưng cùng chủ, tên, loài và ngày sinh.";
+                int choice = JOptionPane.showOptionDialog(this,
+                        detail + "\nĐây có thể là một thú cưng khác."
+                                + "\nBạn có muốn tiếp tục đăng ký?",
+                        "Thông tin thú cưng tương tự",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                        null, new String[]{"Có", "Không"}, "Không");
+                if (choice != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
             if (petDAO.insert(p)) {
                 message("Đăng ký thú cưng thành công.");
                 loadPets();
