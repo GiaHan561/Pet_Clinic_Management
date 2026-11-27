@@ -25,7 +25,7 @@ public class AppointmentServiceDAO {
                    aps.quantity,
                    aps.unitPrice
             FROM APPOINTMENT_SERVICE aps
-            JOIN SERVICE s ON aps.serviceID = s.serviceID
+            JOIN SERVICES s ON aps.serviceID = s.serviceID
             WHERE aps.appointmentID = ?
             """;
 
