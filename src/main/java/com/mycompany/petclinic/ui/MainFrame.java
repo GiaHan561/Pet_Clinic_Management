@@ -185,20 +185,6 @@ public class MainFrame extends JFrame {
         });
     }
 
-    // Đăng xuất
-    protected void handleLogout() {
-        int r = JOptionPane.showConfirmDialog(
-            this,
-            "Bạn có chắc muốn đăng xuất?",
-            "Đăng xuất",
-            JOptionPane.YES_NO_OPTION
-        );
-
-        if (r == JOptionPane.YES_OPTION) {
-            dispose();
-        }
-    }
-
     // Tạo sidebar
     private JPanel createSidebar() {
         JPanel side = new JPanel(new BorderLayout(0, 12));
@@ -245,12 +231,6 @@ public class MainFrame extends JFrame {
         }
 
         side.add(menu, BorderLayout.CENTER);
-
-        // Đăng xuất
-        JButton logout = createMenuButton("Đăng xuất");
-        logout.addActionListener(e -> handleLogout());
-
-        side.add(logout, BorderLayout.SOUTH);
 
         return side;
     }
