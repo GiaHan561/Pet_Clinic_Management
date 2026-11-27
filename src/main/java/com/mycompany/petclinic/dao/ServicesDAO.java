@@ -1,4 +1,3 @@
-
 package com.mycompany.petclinic.dao;
 
 import com.mycompany.petclinic.config.DatabaseConnection;
@@ -14,9 +13,9 @@ public class ServiceDAO {
     public List<Service> findAll() throws SQLException {
         List<Service> list = new ArrayList<>();
 
-        String sql = "SELECT serviceId, serviceName, description, "
-                   + "price, duration, status FROM SERVICE "
-                   + "ORDER BY serviceId";
+        String sql = "SELECT serviceID, serviceName, description, "
+                   + "price, status FROM SERVICES "
+                   + "ORDER BY serviceID";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -26,13 +25,13 @@ public class ServiceDAO {
                 list.add(mapService(rs));
             }
         }
-
         return list;
     }
 
     // Tìm dịch vụ theo ID
     public Service findById(int id) throws SQLException {
-        String sql = "SELECT * FROM SERVICE WHERE serviceId = ?";
+        String sql = "SELECT serviceID, serviceName, description, "
+                   + "price, status FROM SERVICES WHERE serviceID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -45,15 +44,14 @@ public class ServiceDAO {
                 }
             }
         }
-
         return null;
     }
 
     // Thêm dịch vụ
     public int insert(Service service) throws SQLException {
-        String sql = "INSERT INTO SERVICE "
-                   + "(serviceName, description, price, duration, status) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO SERVICES "
+                   + "(serviceName, description, price, status) "
+                   + "VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(
@@ -68,22 +66,21 @@ public class ServiceDAO {
                 }
             }
         }
-
         return -1;
     }
 
     // Cập nhật dịch vụ
     public boolean update(Service service) throws SQLException {
-        String sql = "UPDATE SERVICE SET "
+        String sql = "UPDATE SERVICES SET "
                    + "serviceName = ?, description = ?, price = ?, "
-                   + "duration = ?, status = ? "
-                   + "WHERE serviceId = ?";
+                   + "status = ? "
+                   + "WHERE serviceID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             setParameters(ps, service);
-            ps.setInt(6, service.getServiceId());
+            ps.setInt(5, service.getServiceId());
 
             return ps.executeUpdate() > 0;
         }
@@ -91,7 +88,7 @@ public class ServiceDAO {
 
     // Xóa dịch vụ
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM SERVICE WHERE serviceId = ?";
+        String sql = "DELETE FROM SERVICES WHERE serviceID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -107,11 +104,12 @@ public class ServiceDAO {
 
         List<Service> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM SERVICE "
-                   + "WHERE CAST(serviceId AS VARCHAR(20)) LIKE ? "
+        String sql = "SELECT serviceID, serviceName, description, "
+                   + "price, status FROM SERVICES "
+                   + "WHERE CAST(serviceID AS VARCHAR(20)) LIKE ? "
                    + "OR serviceName LIKE ? "
                    + "OR description LIKE ? "
-                   + "ORDER BY serviceId";
+                   + "ORDER BY serviceID";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -128,31 +126,28 @@ public class ServiceDAO {
                 }
             }
         }
-
         return list;
     }
 
-    // Gán dữ liệu vào PreparedStatement
+    // Gán dữ liệu vào PreparedStatement (4 cột, không còn duration)
     private void setParameters(PreparedStatement ps, Service service)
             throws SQLException {
 
         ps.setString(1, service.getServiceName());
         ps.setString(2, service.getDescription());
         ps.setBigDecimal(3, service.getPrice());
-        ps.setInt(4, service.getDuration());
-        ps.setString(5, service.getStatus());
+        ps.setString(4, service.getStatus());
     }
 
-    // Chuyển ResultSet thành Service
+    // Chuyển ResultSet thành Service (database chưa có duration nên để 0)
     private Service mapService(ResultSet rs) throws SQLException {
         return new Service(
-                rs.getInt("serviceId"),
+                rs.getInt("serviceID"),
                 rs.getString("serviceName"),
                 rs.getString("description"),
                 rs.getBigDecimal("price"),
-                rs.getInt("duration"),
+                0,
                 rs.getString("status")
         );
     }
 }
-
