@@ -31,6 +31,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -103,13 +105,14 @@ public class AppointmentServiceManagementPanel extends JPanel {
 
         lblAppointmentID = new JLabel("Mã lịch hẹn (*)");
         lblServiceID = new JLabel("Mã dịch vụ (*)");
-        lblQuantity = new JLabel("Số lượng (*)");
-        lblUnitPrice = new JLabel("Đơn giá (VNĐ) (*)");
+        lblQuantity = new JLabel("Số lượng thú cưng (*)");
+        lblUnitPrice = new JLabel("Đơn giá (VNĐ) - tự động");
 
         txtAppointmentID = new JTextField();
         txtServiceID = new JTextField();
         txtQuantity = new JTextField();
         txtUnitPrice = new JTextField();
+        txtUnitPrice.setEditable(false);   // đơn giá tự lấy từ bảng dịch vụ
 
         pnlFields.add(lblAppointmentID);
         pnlFields.add(txtAppointmentID);
@@ -157,7 +160,7 @@ public class AppointmentServiceManagementPanel extends JPanel {
     private void initTable() {
         tableModel = new DefaultTableModel(new String[]{
             "Mã lịch hẹn", "Mã dịch vụ", "Tên dịch vụ",
-            "Số lượng", "Đơn giá (VNĐ)", "Thành tiền (VNĐ)"
+            "Số lượng thú cưng", "Đơn giá (VNĐ)", "Thành tiền (VNĐ)"
         }, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -198,6 +201,24 @@ public class AppointmentServiceManagementPanel extends JPanel {
         btnUpdate.addActionListener(e -> updateService());
         btnDelete.addActionListener(e -> deleteService());
         btnClear.addActionListener(e -> clearForm());
+
+        // Nhập mã dịch vụ -> tự hiện đơn giá lấy từ bảng SERVICES
+        txtServiceID.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                showServicePrice();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                showServicePrice();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                showServicePrice();
+            }
+        });
 
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -418,21 +439,24 @@ public class AppointmentServiceManagementPanel extends JPanel {
             int appointmentID = Integer.parseInt(txtAppointmentID.getText().trim());
             int serviceID = Integer.parseInt(txtServiceID.getText().trim());
             int quantity = Integer.parseInt(txtQuantity.getText().trim());
-            BigDecimal unitPrice = new BigDecimal(txtUnitPrice.getText().trim());
 
-            if (quantity <= 0 || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
-                showError("Số lượng phải lớn hơn 0 và đơn giá không được âm!");
+            if (quantity <= 0) {
+                showError("Số lượng thú cưng phải lớn hơn 0!");
                 return;
             }
 
-            AppointmentService item = new AppointmentService(
-                    appointmentID, serviceID, quantity, unitPrice);
+            if (dao.getServicePrice(serviceID) == null) {
+                showError("Mã dịch vụ không tồn tại hoặc đã ngừng cung cấp!");
+                return;
+            }
 
-            if (dao.insert(item)) {
+            // Đơn giá được lấy tự động từ bảng SERVICES trong DAO
+            if (dao.insert(appointmentID, serviceID, quantity)) {
                 message("Thêm dịch vụ thành công!");
                 loadServices();
             } else {
-                showError("Không thể thêm dịch vụ!");
+                showError("Không thể thêm dịch vụ! Kiểm tra lại mã lịch hẹn "
+                        + "(có thể không tồn tại hoặc dịch vụ đã được thêm).");
             }
 
         } catch (NumberFormatException e) {
@@ -450,7 +474,7 @@ public class AppointmentServiceManagementPanel extends JPanel {
             int quantity = Integer.parseInt(txtQuantity.getText().trim());
 
             if (quantity <= 0) {
-                showError("Số lượng phải lớn hơn 0!");
+                showError("Số lượng thú cưng phải lớn hơn 0!");
                 return;
             }
 
@@ -526,6 +550,17 @@ public class AppointmentServiceManagementPanel extends JPanel {
             total = BigDecimal.ZERO;
         }
         lblTotal.setText("Tổng tiền dịch vụ: " + MONEY.format(total) + " VNĐ");
+    }
+
+    // Hiện đơn giá của dịch vụ đang nhập (lấy từ bảng SERVICES)
+    private void showServicePrice() {
+        try {
+            int serviceID = Integer.parseInt(txtServiceID.getText().trim());
+            BigDecimal price = dao.getServicePrice(serviceID);
+            txtUnitPrice.setText(price == null ? "" : MONEY.format(price));
+        } catch (NumberFormatException e) {
+            txtUnitPrice.setText("");
+        }
     }
 
     private void clearForm() {
