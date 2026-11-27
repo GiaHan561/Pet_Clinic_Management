@@ -1,4 +1,3 @@
-
 package com.mycompany.petclinic.dao;
 
 import com.mycompany.petclinic.config.DatabaseConnection;
@@ -213,34 +212,15 @@ public class AppointmentDAO {
         }
     }
 
-    // 6. Kiểm tra bác sĩ có làm việc vào ngày và giờ đó không
-    public boolean isDoctorAvailable(
-            int doctorID,
-            LocalDate date,
-            LocalTime time) throws SQLException {
+    // 6. Kiểm tra bác sĩ có đang hoạt động (Active) không
+    public boolean isDoctorAvailable(int doctorID) throws SQLException {
 
-        String sql = """
-            SELECT COUNT(*)
-            FROM DOCTOR_SCHEDULE ds
-            JOIN DOCTORS d ON ds.doctorID = d.doctorID
-            WHERE ds.doctorID = ?
-              AND ds.day_of_week = ?
-              AND ds.startTime <= ?
-              AND ds.endTime > ?
-              AND d.status = N'Active'
-            """;
-
-        // Java: Monday = 1, Sunday = 7
-        // Database: Monday = 2, Sunday = 8
-        int dayOfWeek = date.getDayOfWeek().getValue() + 1;
+        String sql = "SELECT COUNT(*) FROM DOCTORS WHERE doctorID = ? AND status = N'Active'";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, doctorID);
-            ps.setInt(2, dayOfWeek);
-            ps.setTime(3, Time.valueOf(time));
-            ps.setTime(4, Time.valueOf(time));
 
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
@@ -262,7 +242,7 @@ public class AppointmentDAO {
             SELECT COUNT(*)
             FROM APPOINTMENT
             WHERE appointmentDate = ?
-              AND appointmentTime = ?
+              AND appointmentTime = CAST(? AS TIME)
               AND (doctorID = ? OR petID = ?)
               AND appointmentID <> ?
               AND status NOT IN (N'Cancelled', N'NoShow')
@@ -322,38 +302,16 @@ public class AppointmentDAO {
             }
         }
 
-        // Kiểm tra bác sĩ có lịch làm việc
-        String doctorSql = """
-            SELECT COUNT(*)
-            FROM DOCTOR_SCHEDULE ds
-            JOIN DOCTORS d ON ds.doctorID = d.doctorID
-            WHERE ds.doctorID = ?
-              AND ds.day_of_week = ?
-              AND ds.startTime <= ?
-              AND ds.endTime > ?
-              AND d.status = N'Active'
-            """;
-
-        int dayOfWeek =
-            appointment.getAppointmentDate()
-                       .getDayOfWeek().getValue() + 1;
+        // Kiểm tra bác sĩ đang hoạt động (không kiểm tra lịch làm việc theo giờ)
+        String doctorSql = "SELECT COUNT(*) FROM DOCTORS WHERE doctorID = ? AND status = N'Active'";
 
         try (PreparedStatement ps = conn.prepareStatement(doctorSql)) {
-
             ps.setInt(1, appointment.getDoctorID());
-            ps.setInt(2, dayOfWeek);
-
-            ps.setTime(3,
-                Time.valueOf(appointment.getAppointmentTime()));
-
-            ps.setTime(4,
-                Time.valueOf(appointment.getAppointmentTime()));
 
             try (ResultSet rs = ps.executeQuery()) {
-
                 if (!rs.next() || rs.getInt(1) == 0) {
                     throw new IllegalArgumentException(
-                        "Bác sĩ không làm việc vào thời gian này!"
+                        "Bác sĩ hiện không hoạt động!"
                     );
                 }
             }
@@ -428,4 +386,3 @@ public class AppointmentDAO {
         );
     }
 }
-
