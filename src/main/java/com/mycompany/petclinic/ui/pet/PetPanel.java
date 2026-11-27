@@ -69,7 +69,7 @@ public class PetPanel extends javax.swing.JPanel {
     private static final Color DISABLED = new Color(208, 213, 223);
 
     // Giá trị giới tính lưu vào DB - đổi tại đây nếu CSDL dùng giá trị khác.
-    private static final String[] GENDERS = {"", "Đực", "cái"};
+    private static final String[] GENDERS = {"", "Đực", "Cái"};
 
     private final PetDAO petDAO = new PetDAO();
     private final PetTypeDAO typeDAO = new PetTypeDAO();

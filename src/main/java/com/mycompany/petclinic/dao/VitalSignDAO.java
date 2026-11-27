@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class VitalSignDAO {
 
     public int insert(VitalSign s) throws SQLException {

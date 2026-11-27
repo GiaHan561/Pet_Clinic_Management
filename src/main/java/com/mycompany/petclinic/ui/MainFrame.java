@@ -1,6 +1,7 @@
 
 package com.mycompany.petclinic.ui;
 
+
 import com.mycompany.petclinic.ui.customer.CustomerPanel;
 import com.mycompany.petclinic.ui.pet.PetPanel;
 import com.mycompany.petclinic.ui.medical.MedicalRecordPanel;
