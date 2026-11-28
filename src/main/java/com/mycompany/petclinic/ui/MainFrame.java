@@ -1,9 +1,8 @@
-
 package com.mycompany.petclinic.ui;
 
 
 import com.mycompany.petclinic.ui.customer.CustomerPanel;
-import com.mycompany.petclinic.ui.invoice.InvoicePanel;
+import com.mycompany.petclinic.ui.payment.InvoicePanel;
 import com.mycompany.petclinic.ui.payment.PaymentPanel;
 import com.mycompany.petclinic.ui.pet.PetPanel;
 import com.mycompany.petclinic.ui.medical.MedicalRecordPanel;
@@ -12,8 +11,6 @@ import com.mycompany.petclinic.ui.doctor.DoctorManagementPanel;
 import com.mycompany.petclinic.ui.service.ServiceManagementPanel;
 import com.mycompany.petclinic.ui.appointmentservice.AppointmentServiceManagementPanel;
 import com.mycompany.petclinic.ui.medical.MedicinePanel;
-import com.mycompany.petclinic.ui.payment.InvoicePanel;
-import com.mycompany.petclinic.ui.payment.PaymentPanel;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -110,7 +107,7 @@ public class MainFrame extends JFrame {
         registerPanel(KEY_SERVICE, new ServiceManagementPanel());
         registerPanel(KEY_MEDICINE, new MedicinePanel());
         
-        PaymentPanel paymentPanel = new PaymentPanel();
+        paymentPanel = new PaymentPanel();
         registerPanel(KEY_PAYMENT, paymentPanel);
         registerPanel(KEY_INVOICE, new InvoicePanel(id -> {
             showPanel(KEY_PAYMENT);
