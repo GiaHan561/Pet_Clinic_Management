@@ -227,15 +227,21 @@ public class DoctorDAO {
         );
     }
 
-    // 9. Gán tham số cho DOCTORS (5 cột, không còn specialization)
     private void setDoctorParameters(
             PreparedStatement ps, Doctor doctor)
             throws SQLException {
 
-        ps.setString(1, doctor.getFullName());
-        ps.setString(2, doctor.getPhone());
-        ps.setString(3, doctor.getEmail());
-        ps.setString(4, doctor.getLicenseNumber());
+        ps.setString(1, doctor.getFullName().trim());
+        ps.setString(2, doctor.getPhone().trim());
+
+        String email = doctor.getEmail();
+        if (email == null || email.trim().isEmpty()) {
+            ps.setNull(3, Types.VARCHAR);
+        } else {
+            ps.setString(3, email.trim());
+        }
+
+        ps.setString(4, doctor.getLicenseNumber().trim());
         ps.setString(5, doctor.getStatus());
     }
 }
