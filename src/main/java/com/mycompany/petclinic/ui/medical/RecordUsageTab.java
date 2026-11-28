@@ -79,15 +79,23 @@ public class RecordUsageTab extends JPanel {
         UiStyle.button(btnClear, new Color(110, 120, 140));
         UiStyle.button(btnManage, new Color(125, 87, 194));
 
-        JPanel search = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 4));
-        search.add(lblRecord);
-        search.add(txtRecordID);
-        search.add(lblPet);
-        search.add(txtPetID);
-        search.add(btnSearch);
-        search.add(btnAll);
-        search.add(btnClear);
-        search.add(btnManage);
+        JPanel inputRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 4));
+        inputRow.setOpaque(false);
+        inputRow.add(lblRecord);
+        inputRow.add(txtRecordID);
+        inputRow.add(lblPet);
+        inputRow.add(txtPetID);
+        
+        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 4));
+        buttonRow.setOpaque(false);
+        buttonRow.add(btnSearch);
+        buttonRow.add(btnAll);
+        buttonRow.add(btnClear);
+        buttonRow.add(btnManage);
+        
+        JPanel search = new JPanel(new GridLayout(2, 1, 0, 4));
+        search.add(inputRow);
+        search.add(buttonRow);
         UiStyle.card(search, "Tìm hồ sơ khám bệnh");
 
         recordModel = new ReadOnlyModel(new String[]{

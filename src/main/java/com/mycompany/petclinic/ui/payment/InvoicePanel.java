@@ -1,4 +1,4 @@
-package com.mycompany.petclinic.ui.invoice;
+package com.mycompany.petclinic.ui.payment;
 
 import com.mycompany.petclinic.dao.InvoiceDAO;
 import com.mycompany.petclinic.model.Invoice;
