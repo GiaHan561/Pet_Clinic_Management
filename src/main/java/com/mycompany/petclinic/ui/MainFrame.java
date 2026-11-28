@@ -9,6 +9,9 @@ import com.mycompany.petclinic.ui.appointment.AppointmentManagementPanel;
 import com.mycompany.petclinic.ui.doctor.DoctorManagementPanel;
 import com.mycompany.petclinic.ui.service.ServiceManagementPanel;
 import com.mycompany.petclinic.ui.appointmentservice.AppointmentServiceManagementPanel;
+import com.mycompany.petclinic.ui.medical.MedicinePanel;
+import com.mycompany.petclinic.ui.payment.InvoicePanel;
+import com.mycompany.petclinic.ui.payment.PaymentPanel;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -101,7 +104,14 @@ public class MainFrame extends JFrame {
 
         // Màn hình quản lý dịch vụ
         registerPanel(KEY_SERVICE, new ServiceManagementPanel());
-
+        registerPanel(KEY_MEDICINE, new MedicinePanel());
+        
+        PaymentPanel paymentPanel = new PaymentPanel();
+        registerPanel(KEY_PAYMENT, paymentPanel);
+        registerPanel(KEY_INVOICE, new InvoicePanel(id -> {
+            showPanel(KEY_PAYMENT);
+            paymentPanel.openForInvoice(id);
+        }));
         // Màn hình quản lý dịch vụ lịch hẹn
         registerPanel(
             KEY_APPOINTMENT_SERVICE,
