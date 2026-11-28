@@ -65,7 +65,12 @@ VALUES
 (N'Men tiêu hóa Pro', N'Probiotic',     N'Hỗ trợ hệ tiêu hóa',         N'Gói',  300,  8000, '2027-05-15'),
 (N'Thuốc nhỏ mắt Tobra',N'Tobramycin',  N'Điều trị viêm kết mạc',      N'Chai', 150, 45000, '2026-11-20'),
 (N'Xịt trị rận Frontline',N'Fipronil',   N'Trị ve rận bọ chét',         N'Chai', 100,180000, '2028-01-10');
-
+UPDATE MEDICINE SET dosage = N'1/2 viên', manufactureDate = '2025-01-15' WHERE medicineID = 1;
+UPDATE MEDICINE SET dosage = N'1 viên',   manufactureDate = '2025-02-20' WHERE medicineID = 2;
+UPDATE MEDICINE SET dosage = N'1 gói',    manufactureDate = '2025-03-10' WHERE medicineID = 3;
+UPDATE MEDICINE SET dosage = N'2 giọt',   manufactureDate = '2025-04-01' WHERE medicineID = 4;
+UPDATE MEDICINE SET dosage = N'2-3 xịt',  manufactureDate = '2025-05-05' WHERE medicineID = 5;
+GO
 
 INSERT INTO MEDICINE_CATEGORY (medicineID, category) 
 VALUES
@@ -359,8 +364,9 @@ VALUES
 (50, 6, 1, 300000);
 
 
-INSERT INTO MEDICAL_VISIT (recordID, doctorID, appointmentID, vaccinID, reason, note, status) 
-VALUES
+INSERT INTO MEDICAL_VISIT (recordID, doctorID, appointmentID, vaccinID, reason, note, status, petID)
+SELECT t.recordID, t.doctorID, t.appointmentID, t.vaccinID, t.reason, t.note, t.status, r.petID
+FROM (VALUES
 (1, 1, 1, NULL, N'Khám da, ngứa nhiều',  N'Nghi viêm da dị ứng',        N'Completed'),
 (2, 2, 2, 2,    N'Tiêm phòng định kỳ',   N'Mèo phản ứng tốt sau tiêm',  N'Completed'),
 (3, 3, 3, NULL, N'Bỏ ăn 2 ngày',         N'Đang khám và theo dõi',      N'InProgress'),
@@ -410,8 +416,25 @@ VALUES
 (47, 3, 47, NULL, N'Khám da',              N'Viêm da rận bọ chét',        N'Completed'),
 (48, 5, 48, 2,    N'Tiêm ngừa',            N'Đã tiêm',                    N'Completed'),
 (49, 1, 49, NULL, N'Khám sức khỏe',        N'Khỏe mạnh',                  N'Completed'),
-(50, 4, 50, NULL, N'Vệ sinh & Tắm',        N'Hoàn thành',                 N'Completed');
+(50, 4, 50, NULL, N'Vệ sinh & Tắm',        N'Hoàn thành',                 N'Completed')) AS t(recordID, doctorID, appointmentID, vaccinID, reason, note, status)
+JOIN MEDICAL_RECORD r ON r.recordID = t.recordID;
+GO
 
+UPDATE v
+SET v.visitTime = DATEADD(SECOND, DATEDIFF(SECOND, 0, a.appointmentTime),
+                          CAST(a.appointmentDate AS DATETIME2))
+FROM MEDICAL_VISIT v
+JOIN APPOINTMENT a ON a.appointmentID = v.appointmentID;
+GO
+
+INSERT INTO VACCINATION (visitID, vaccinID, injectionDate, nextInjectionDate)
+SELECT v.visitID, v.vaccinID, CAST(v.visitTime AS DATE),
+       DATEADD(DAY, vc.rcmInterval, CAST(v.visitTime AS DATE))
+FROM MEDICAL_VISIT v
+JOIN VACCINE vc ON vc.vaccinID = v.vaccinID
+WHERE v.vaccinID IS NOT NULL;
+GO
+  
 INSERT INTO VITAL_SIGN (visitID, weight, temperature, respiratoryRate, note) 
 VALUES
 (1, 12.60, 38.6, 24, N'Bình thường'),
