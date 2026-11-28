@@ -1,4 +1,5 @@
 package com.mycompany.petclinic.ui.appointment;
+
 import com.mycompany.petclinic.dao.AppointmentDAO;
 import com.mycompany.petclinic.model.Appointment;
 import java.awt.BorderLayout;
@@ -69,6 +70,8 @@ public class AppointmentManagementPanel extends JPanel {
             txtDate, txtTime, txtReason, txtNote;
 
     private JButton btnAdd, btnUpdate, btnCancel, btnClear;
+    private JLabel lblSearch;
+    private JPanel pnlSearch;
     private JTextField txtSearch;
     private JButton btnSearch;
 
@@ -86,24 +89,32 @@ public class AppointmentManagementPanel extends JPanel {
     }
 
     // ------------------------------------------------------------------
-    // Dựng giao diện
+    // Xử lý nghiệp vụ
     // ------------------------------------------------------------------
-    // Tải danh sách lịch hẹn từ database
-private void searchAppointments() {
 
-    try {
+    // Tìm kiếm theo mã lịch hẹn
+    private void searchAppointments() {
         String keyword = txtSearch.getText().trim();
 
-        AppointmentDAO dao = new AppointmentDAO();
-
-        model.setRowCount(0);
-
+        // Để trống -> hiện lại tất cả lịch hẹn
         if (keyword.isEmpty()) {
             loadAppointments();
             return;
         }
 
-        for (Appointment a : dao.findByKeyword(keyword)) {
+        try {
+            int appointmentID = Integer.parseInt(keyword);
+
+            AppointmentDAO dao = new AppointmentDAO();
+            Appointment a = dao.findById(appointmentID);
+
+            model.setRowCount(0);
+
+            if (a == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Không tìm thấy lịch hẹn có mã " + appointmentID + "!");
+                return;
+            }
 
             model.addRow(new Object[]{
                 a.getAppointmentID(),
@@ -116,257 +127,267 @@ private void searchAppointments() {
                 a.getStatus(),
                 a.getNote()
             });
-        }
 
-        if (model.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this,
-                    "Không tìm thấy lịch hẹn phù hợp!");
-        }
-
-        clearFields();
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-                "Lỗi tìm kiếm: " + e.getMessage(),
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
-    }
-}
-private void cancelAppointment() {
-
-    try {
-        // Kiểm tra đã chọn lịch hẹn
-        if (txtID.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Vui lòng chọn lịch hẹn cần hủy!");
-            return;
-        }
-
-        int appointmentID =
-                Integer.parseInt(txtID.getText().trim());
-
-        // Xác nhận hủy
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Bạn có chắc chắn muốn hủy lịch hẹn này?",
-                "Xác nhận hủy lịch",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE
-        );
-
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        // Nhập lý do hủy
-        String cancelReason = JOptionPane.showInputDialog(
-                this,
-                "Nhập lý do hủy lịch:"
-        );
-
-        if (cancelReason == null) {
-            return;
-        }
-
-        cancelReason = cancelReason.trim();
-
-        if (cancelReason.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Vui lòng nhập lý do hủy!");
-            return;
-        }
-
-        // Gọi DAO
-        AppointmentDAO dao = new AppointmentDAO();
-
-        boolean cancelled =
-                dao.cancel(appointmentID, cancelReason);
-
-        if (cancelled) {
-            JOptionPane.showMessageDialog(this,
-                    "Hủy lịch hẹn thành công!");
-
-            loadAppointments();
             clearFields();
 
-        } else {
+        } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                    "Không thể hủy lịch hẹn này!\n"
-                    + "Lịch có thể đã hoàn thành, đã hủy "
-                    + "hoặc không tồn tại.");
-        }
+                    "Mã lịch hẹn phải là số!");
 
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(
-                this,
-                "Lỗi hủy lịch: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE
-        );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Lỗi tìm kiếm: " + e.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
-}
-private void updateAppointment() {
 
-    try {
-        // Kiểm tra đã chọn lịch hẹn
-        if (txtID.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Vui lòng chọn lịch hẹn cần cập nhật!");
-            return;
+    // Hủy lịch hẹn
+    private void cancelAppointment() {
+
+        try {
+            // Kiểm tra đã chọn lịch hẹn
+            if (txtID.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn lịch hẹn cần hủy!");
+                return;
+            }
+
+            int appointmentID =
+                    Integer.parseInt(txtID.getText().trim());
+
+            // Xác nhận hủy
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Bạn có chắc chắn muốn hủy lịch hẹn này?",
+                    "Xác nhận hủy lịch",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            // Nhập lý do hủy
+            String cancelReason = JOptionPane.showInputDialog(
+                    this,
+                    "Nhập lý do hủy lịch:"
+            );
+
+            if (cancelReason == null) {
+                return;
+            }
+
+            cancelReason = cancelReason.trim();
+
+            if (cancelReason.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng nhập lý do hủy!");
+                return;
+            }
+
+            // Gọi DAO
+            AppointmentDAO dao = new AppointmentDAO();
+
+            boolean cancelled =
+                    dao.cancel(appointmentID, cancelReason);
+
+            if (cancelled) {
+                JOptionPane.showMessageDialog(this,
+                        "Hủy lịch hẹn thành công!");
+
+                loadAppointments();
+                clearFields();
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Không thể hủy lịch hẹn này!\n"
+                        + "Lịch có thể đã hoàn thành, đã hủy "
+                        + "hoặc không tồn tại.");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Lỗi hủy lịch: " + e.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
-
-        int appointmentID = Integer.parseInt(txtID.getText().trim());
-        int customerID = Integer.parseInt(txtCustomerID.getText().trim());
-        int petID = Integer.parseInt(txtPetID.getText().trim());
-        int doctorID = Integer.parseInt(txtDoctorID.getText().trim());
-
-        LocalDate date = LocalDate.parse(txtDate.getText().trim());
-        LocalTime time = LocalTime.parse(txtTime.getText().trim());
-
-        String reason = txtReason.getText().trim();
-        String note = txtNote.getText().trim();
-
-        if (reason.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Vui lòng nhập lý do khám!");
-            return;
-        }
-
-        Appointment appointment = new Appointment(
-                appointmentID,
-                customerID,
-                petID,
-                doctorID,
-                date,
-                time,
-                reason,
-                note,
-                txtStatus.getText().trim()
-        );
-
-        AppointmentDAO dao = new AppointmentDAO();
-
-        boolean updated = dao.update(appointment);
-
-        if (updated) {
-            JOptionPane.showMessageDialog(this,
-                    "Cập nhật lịch hẹn thành công!");
-
-            loadAppointments();
-            clearFields();
-
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Không thể cập nhật lịch hẹn. "
-                    + "Lịch có thể đã hoàn thành hoặc bị hủy.");
-        }
-
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this,
-                "Các mã ID phải là số!");
-
-    } catch (java.time.format.DateTimeParseException e) {
-        JOptionPane.showMessageDialog(this,
-                "Ngày nhập yyyy-MM-dd, giờ nhập HH:mm!");
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-                "Lỗi cập nhật: " + e.getMessage(),
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
-}
-private void addAppointment() {
 
-    try {
-        // Lấy dữ liệu từ form
-        int customerID = Integer.parseInt(txtCustomerID.getText().trim());
-        int petID = Integer.parseInt(txtPetID.getText().trim());
-        int doctorID = Integer.parseInt(txtDoctorID.getText().trim());
+    // Cập nhật lịch hẹn
+    private void updateAppointment() {
 
-        LocalDate date = LocalDate.parse(txtDate.getText().trim());
-        LocalTime time = LocalTime.parse(txtTime.getText().trim());
+        try {
+            // Kiểm tra đã chọn lịch hẹn
+            if (txtID.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng chọn lịch hẹn cần cập nhật!");
+                return;
+            }
 
-        String reason = txtReason.getText().trim();
-        String note = txtNote.getText().trim();
+            int appointmentID = Integer.parseInt(txtID.getText().trim());
+            int customerID = Integer.parseInt(txtCustomerID.getText().trim());
+            int petID = Integer.parseInt(txtPetID.getText().trim());
+            int doctorID = Integer.parseInt(txtDoctorID.getText().trim());
 
-        // Kiểm tra dữ liệu bắt buộc
-        if (reason.isEmpty()) {
+            LocalDate date = LocalDate.parse(txtDate.getText().trim());
+            LocalTime time = LocalTime.parse(txtTime.getText().trim());
+
+            String reason = txtReason.getText().trim();
+            String note = txtNote.getText().trim();
+
+            if (reason.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng nhập lý do khám!");
+                return;
+            }
+
+            Appointment appointment = new Appointment(
+                    appointmentID,
+                    customerID,
+                    petID,
+                    doctorID,
+                    date,
+                    time,
+                    reason,
+                    note,
+                    txtStatus.getText().trim()
+            );
+
+            AppointmentDAO dao = new AppointmentDAO();
+
+            boolean updated = dao.update(appointment);
+
+            if (updated) {
+                JOptionPane.showMessageDialog(this,
+                        "Cập nhật lịch hẹn thành công!");
+
+                loadAppointments();
+                clearFields();
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Không thể cập nhật lịch hẹn. "
+                        + "Lịch có thể đã hoàn thành hoặc bị hủy.");
+            }
+
+        } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                    "Vui lòng nhập lý do khám!");
-            return;
-        }
+                    "Các mã ID phải là số!");
 
-        // Tạo đối tượng Appointment
-        Appointment appointment = new Appointment(
-                customerID,
-                petID,
-                doctorID,
-                date,
-                time,
-                reason,
-                note
-        );
-
-        // Gọi DAO để lưu
-        AppointmentDAO dao = new AppointmentDAO();
-        int newID = dao.insert(appointment);
-
-        if (newID > 0) {
+        } catch (java.time.format.DateTimeParseException e) {
             JOptionPane.showMessageDialog(this,
-                    "Thêm lịch hẹn thành công!\nMã lịch hẹn: " + newID);
+                    "Ngày nhập yyyy-MM-dd, giờ nhập HH:mm!");
 
-            loadAppointments();
-            clearFields();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Lỗi cập nhật: " + e.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this,
-                "Mã khách hàng, thú cưng và bác sĩ phải là số!");
-
-    } catch (java.time.format.DateTimeParseException e) {
-        JOptionPane.showMessageDialog(this,
-                "Ngày nhập theo yyyy-MM-dd và giờ theo HH:mm!");
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-                "Không thể thêm lịch hẹn: " + e.getMessage(),
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
-}
-private void loadAppointments() {
 
-    try {
-        AppointmentDAO dao = new AppointmentDAO();
+    // Thêm lịch hẹn
+    private void addAppointment() {
 
-        // Xóa dữ liệu cũ trên bảng
-        model.setRowCount(0);
+        try {
+            // Lấy dữ liệu từ form
+            int customerID = Integer.parseInt(txtCustomerID.getText().trim());
+            int petID = Integer.parseInt(txtPetID.getText().trim());
+            int doctorID = Integer.parseInt(txtDoctorID.getText().trim());
 
-        // Lấy danh sách lịch hẹn
-        for (Appointment a : dao.findAll()) {
+            LocalDate date = LocalDate.parse(txtDate.getText().trim());
+            LocalTime time = LocalTime.parse(txtTime.getText().trim());
 
-           model.addRow(new Object[]{
-                a.getAppointmentID(),
-                a.getCustomerID(),
-                a.getPetID(),
-                a.getDoctorID(),
-                a.getAppointmentDate(),
-                a.getAppointmentTime(),
-                a.getReason(),
-                a.getStatus(),
-                a.getNote()
-            });
+            String reason = txtReason.getText().trim();
+            String note = txtNote.getText().trim();
+
+            // Kiểm tra dữ liệu bắt buộc
+            if (reason.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Vui lòng nhập lý do khám!");
+                return;
+            }
+
+            // Tạo đối tượng Appointment
+            Appointment appointment = new Appointment(
+                    customerID,
+                    petID,
+                    doctorID,
+                    date,
+                    time,
+                    reason,
+                    note
+            );
+
+            // Gọi DAO để lưu
+            AppointmentDAO dao = new AppointmentDAO();
+            int newID = dao.insert(appointment);
+
+            if (newID > 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Thêm lịch hẹn thành công!\nMã lịch hẹn: " + newID);
+
+                loadAppointments();
+                clearFields();
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Mã khách hàng, thú cưng và bác sĩ phải là số!");
+
+        } catch (java.time.format.DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Ngày nhập theo yyyy-MM-dd và giờ theo HH:mm!");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể thêm lịch hẹn: " + e.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-
-    } catch (Exception e) {
-
-        JOptionPane.showMessageDialog(
-            this,
-            "Không thể tải danh sách lịch hẹn!\n"
-            + e.getMessage(),
-            "Lỗi",
-            JOptionPane.ERROR_MESSAGE
-        );
     }
-}
+
+    // Tải danh sách lịch hẹn từ database
+    private void loadAppointments() {
+
+        try {
+            AppointmentDAO dao = new AppointmentDAO();
+
+            // Xóa dữ liệu cũ trên bảng
+            model.setRowCount(0);
+
+            // Lấy danh sách lịch hẹn
+            for (Appointment a : dao.findAll()) {
+
+                model.addRow(new Object[]{
+                    a.getAppointmentID(),
+                    a.getCustomerID(),
+                    a.getPetID(),
+                    a.getDoctorID(),
+                    a.getAppointmentDate(),
+                    a.getAppointmentTime(),
+                    a.getReason(),
+                    a.getStatus(),
+                    a.getNote()
+                });
+            }
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Không thể tải danh sách lịch hẹn!\n"
+                    + e.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Dựng giao diện
+    // ------------------------------------------------------------------
     private void initComponents() {
         setLayout(new BorderLayout(0, 12));
 
@@ -429,28 +450,37 @@ private void loadAppointments() {
 
         pnlTop.add(pnlFields, BorderLayout.CENTER);
 
-        // Hàng nút và tìm kiếm
-pnlActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // Hàng nút (bên trái) + ô tìm kiếm (bên phải)
+        pnlActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
 
-btnAdd = new JButton("Thêm");
-btnUpdate = new JButton("Cập nhật");
-btnCancel = new JButton("Hủy lịch");
-btnClear = new JButton("Xóa form");
+        btnAdd = new JButton("Thêm");
+        btnUpdate = new JButton("Cập nhật");
+        btnCancel = new JButton("Hủy lịch");
+        btnClear = new JButton("Xóa form");
 
-txtSearch = new JTextField(18);
-btnSearch = new JButton("Tìm kiếm");
+        pnlActions.add(btnAdd);
+        pnlActions.add(btnUpdate);
+        pnlActions.add(btnCancel);
+        pnlActions.add(btnClear);
 
-// Thêm các thành phần vào panel
-pnlActions.add(btnAdd);
-pnlActions.add(btnUpdate);
-pnlActions.add(btnCancel);
-pnlActions.add(btnClear);
-pnlActions.add(txtSearch);
-pnlActions.add(btnSearch);
+        // Tìm kiếm theo mã lịch hẹn: nhãn + khung nhập + nút
+        lblSearch = new JLabel("Tìm kiếm theo mã lịch hẹn:");
+        txtSearch = new JTextField(10);
+        btnSearch = new JButton("Tìm kiếm");
 
-pnlTop.add(pnlActions, BorderLayout.SOUTH);
+        pnlSearch = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        pnlSearch.add(lblSearch);
+        pnlSearch.add(txtSearch);
+        pnlSearch.add(btnSearch);
 
-add(pnlTop, BorderLayout.NORTH);
+        JPanel pnlBar = new JPanel(new BorderLayout());
+        pnlBar.setOpaque(false);
+        pnlBar.add(pnlActions, BorderLayout.WEST);
+        pnlBar.add(pnlSearch, BorderLayout.EAST);
+
+        pnlTop.add(pnlBar, BorderLayout.SOUTH);
+
+        add(pnlTop, BorderLayout.NORTH);
 
         // Bảng
         tblData = new JTable();
@@ -466,33 +496,34 @@ add(pnlTop, BorderLayout.NORTH);
     }
 
     private void initTable() {
-    model = new DefaultTableModel(new String[]{
-        "Mã lịch hẹn", "Mã KH", "Mã thú cưng", "Mã bác sĩ",
-        "Ngày hẹn", "Giờ hẹn", "Lý do khám", "Trạng thái", "Ghi chú"
-    }, 0) {
-        @Override
-        public boolean isCellEditable(int r, int c) {
-            return false;
+        model = new DefaultTableModel(new String[]{
+            "Mã lịch hẹn", "Mã KH", "Mã thú cưng", "Mã bác sĩ",
+            "Ngày hẹn", "Giờ hẹn", "Lý do khám", "Trạng thái", "Ghi chú"
+        }, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int c) {
+                return c <= 3 ? Integer.class : String.class;
+            }
+        };
+
+        tblData.setModel(model);
+        tblData.setAutoCreateRowSorter(true);
+        tblData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        int[] widths = {100, 80, 100, 100, 110, 90, 220, 110, 200};
+
+        for (int i = 0; i < widths.length; i++) {
+            tblData.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
         }
 
-        @Override
-        public Class<?> getColumnClass(int c) {
-            return c <= 3 ? Integer.class : String.class;
-        }
-    };
-
-    tblData.setModel(model);
-    tblData.setAutoCreateRowSorter(true);
-    tblData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-    int[] widths = {100, 80, 100, 100, 110, 90, 220, 110, 200};
-
-    for (int i = 0; i < widths.length; i++) {
-        tblData.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+        tblData.getColumnModel().getColumn(0).setMaxWidth(120);
     }
 
-    tblData.getColumnModel().getColumn(0).setMaxWidth(120);
-}
     // ------------------------------------------------------------------
     // Sự kiện
     // ------------------------------------------------------------------
@@ -503,7 +534,6 @@ add(pnlTop, BorderLayout.NORTH);
         btnClear.addActionListener(e -> clearFields());
         btnSearch.addActionListener(e -> searchAppointments());
         txtSearch.addActionListener(e -> searchAppointments());
-        
 
         tblData.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -520,6 +550,9 @@ add(pnlTop, BorderLayout.NORTH);
         setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
         pnlTop.setOpaque(false);
         pnlActions.setOpaque(false);
+        pnlSearch.setOpaque(false);
+        lblSearch.setFont(new Font(FONT, Font.BOLD, 13));
+        lblSearch.setForeground(LABEL);
 
         // Tiêu đề
         lblTitle.setFont(new Font(FONT, Font.BOLD, 26));
@@ -667,26 +700,26 @@ add(pnlTop, BorderLayout.NORTH);
     // Xử lý form
     // ------------------------------------------------------------------
     private void selectRow() {
-    int selected = tblData.getSelectedRow();
+        int selected = tblData.getSelectedRow();
 
-    if (selected == -1) {
-        return;
+        if (selected == -1) {
+            return;
+        }
+
+        int r = tblData.convertRowIndexToModel(selected);
+
+        txtID.setText(cell(r, 0));
+        txtCustomerID.setText(cell(r, 1));
+        txtPetID.setText(cell(r, 2));
+        txtDoctorID.setText(cell(r, 3));
+        txtDate.setText(cell(r, 4));
+        txtTime.setText(cell(r, 5));
+        txtReason.setText(cell(r, 6));
+        txtStatus.setText(cell(r, 7));
+        txtNote.setText(cell(r, 8));
+
+        setSelectedMode(true);
     }
-
-    int r = tblData.convertRowIndexToModel(selected);
-
-    txtID.setText(cell(r, 0));
-    txtCustomerID.setText(cell(r, 1));
-    txtPetID.setText(cell(r, 2));
-    txtDoctorID.setText(cell(r, 3));
-    txtDate.setText(cell(r, 4));
-    txtTime.setText(cell(r, 5));
-    txtReason.setText(cell(r, 6));
-    txtStatus.setText(cell(r, 7));
-    txtNote.setText(cell(r, 8));
-
-    setSelectedMode(true);
-}
 
     /** Đang chọn một lịch hẹn: chỉ cho cập nhật / hủy, không cho thêm mới. */
     private void setSelectedMode(boolean selected) {
