@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
@@ -43,7 +44,11 @@ import javax.swing.table.JTableHeader;
  *
  * Cấu trúc đồng bộ với AppointmentManagementPanel / ServiceManagementPanel:
  * initComponents -> initTable -> applyStyle -> bindEvents.
- * Phần xử lý nghiệp vụ (tải / thêm / cập nhật / xóa / tính tổng) giữ nguyên.
+ *
+ * Cách hiển thị:
+ *  - Mỗi lần bấm vào màn hình này: hiện TẤT CẢ dịch vụ của mọi lịch hẹn.
+ *  - Nhập mã lịch hẹn rồi bấm "Tải dịch vụ": chỉ hiện dịch vụ của lịch hẹn đó.
+ *  - Để trống mã lịch hẹn rồi bấm "Tải dịch vụ" / "Xóa form": hiện lại tất cả.
  */
 public class AppointmentServiceManagementPanel extends JPanel {
 
@@ -86,6 +91,7 @@ public class AppointmentServiceManagementPanel extends JPanel {
         applyStyle();
         bindEvents();
         setSelectedMode(false);
+        loadServices();   // mở lên là hiện tất cả dịch vụ
     }
 
     // ------------------------------------------------------------------
@@ -201,6 +207,14 @@ public class AppointmentServiceManagementPanel extends JPanel {
         btnUpdate.addActionListener(e -> updateService());
         btnDelete.addActionListener(e -> deleteService());
         btnClear.addActionListener(e -> clearForm());
+
+        // Mỗi lần màn hình này được hiển thị -> tải lại tất cả dịch vụ
+        addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0
+                    && isShowing()) {
+                clearForm();
+            }
+        });
 
         // Nhập mã dịch vụ -> tự hiện đơn giá lấy từ bảng SERVICES
         txtServiceID.getDocument().addDocumentListener(new DocumentListener() {
@@ -406,10 +420,28 @@ public class AppointmentServiceManagementPanel extends JPanel {
     // Tải dữ liệu
     // ------------------------------------------------------------------
     private void loadServices() {
-        try {
-            int appointmentID = Integer.parseInt(txtAppointmentID.getText().trim());
+        String text = txtAppointmentID.getText().trim();
 
-            List<AppointmentService> list = dao.findByAppointmentId(appointmentID);
+        try {
+            List<AppointmentService> list;
+
+            if (text.isEmpty()) {
+                // Không nhập mã lịch hẹn -> hiện TẤT CẢ dịch vụ
+                list = dao.findAll();
+
+                BigDecimal total = BigDecimal.ZERO;
+                for (AppointmentService item : list) {
+                    total = total.add(item.getTotalPrice());
+                }
+                lblTotal.setText("Tổng tiền tất cả dịch vụ: "
+                        + MONEY.format(total) + " VNĐ");
+
+            } else {
+                // Có nhập mã lịch hẹn -> chỉ hiện dịch vụ của lịch hẹn đó
+                int appointmentID = Integer.parseInt(text);
+                list = dao.findByAppointmentId(appointmentID);
+                updateTotal(appointmentID);
+            }
 
             tableModel.setRowCount(0);
 
@@ -423,8 +455,6 @@ public class AppointmentServiceManagementPanel extends JPanel {
                     item.getTotalPrice()
                 });
             }
-
-            updateTotal(appointmentID);
 
         } catch (NumberFormatException e) {
             showError("Vui lòng nhập mã lịch hẹn hợp lệ!");
@@ -569,11 +599,11 @@ public class AppointmentServiceManagementPanel extends JPanel {
         txtQuantity.setText("");
         txtUnitPrice.setText("");
 
-        tableModel.setRowCount(0);
-        lblTotal.setText("Tổng tiền dịch vụ: 0 VNĐ");
-
         table.clearSelection();
         setSelectedMode(false);
+
+        loadServices();   // ô mã lịch hẹn đang trống -> hiện tất cả
+
         txtAppointmentID.requestFocus();
     }
 
