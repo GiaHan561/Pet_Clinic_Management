@@ -1,4 +1,3 @@
-
 package com.mycompany.petclinic.ui.doctor;
 
 import com.mycompany.petclinic.dao.DoctorDAO;
@@ -87,7 +86,7 @@ public class DoctorManagementPanel extends JPanel {
         addField("Số điện thoại (*)", txtPhone);
         addField("Email", txtEmail);
         addField("Chuyên môn (*)", txtSpecialization);
-        addField("Số giấy phép", txtLicense);
+        addField("Số giấy phép (*)", txtLicense);
         addField("Trạng thái", cboStatus);
 
         pnlTop.add(pnlFields, BorderLayout.CENTER);
@@ -195,6 +194,16 @@ public class DoctorManagementPanel extends JPanel {
         }
     }
 
+    private String statusToText(String status) {
+        if ("OnLeave".equals(status)) {
+            return "Nghỉ phép";
+        }
+        if ("Inactive".equals(status)) {
+            return "Nghỉ việc";
+        }
+        return "Đang làm việc";
+    }
+
     private void addDoctorRow(Doctor d) {
         model.addRow(new Object[]{
             d.getDoctorID(),
@@ -203,7 +212,7 @@ public class DoctorManagementPanel extends JPanel {
             d.getEmail(),
             d.getSpecialization(),
             d.getLicenseNumber(),
-            d.getStatus()
+            statusToText(d.getStatus())
         });
     }
 
@@ -324,7 +333,6 @@ public class DoctorManagementPanel extends JPanel {
     }
 
     // ================== LẤY DỮ LIỆU FORM ==================
-
     private Doctor getDoctorFromForm() {
         String name = txtName.getText().trim();
         String phone = txtPhone.getText().trim();
@@ -332,12 +340,37 @@ public class DoctorManagementPanel extends JPanel {
         String specialization =
                 txtSpecialization.getText().trim();
         String license = txtLicense.getText().trim();
-        String status = cboStatus.getSelectedItem().toString();
 
         if (name.isEmpty() || phone.isEmpty()
-                || specialization.isEmpty()) {
+                || specialization.isEmpty() || license.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Vui lòng nhập đầy đủ họ tên, số điện thoại và chuyên môn!");
+                    "Vui lòng nhập đầy đủ họ tên, số điện thoại, chuyên môn và số giấy phép!");
+        }
+
+        // Kiểm tra số điện thoại đúng 10 chữ số và bắt đầu bằng 0 (khớp với CK_DOCTORS_phone)
+        if (!phone.matches("^0\\d{9}$")) {
+            throw new IllegalArgumentException(
+                    "Số điện thoại không hợp lệ! Vui lòng nhập đúng 10 chữ số và bắt đầu bằng số 0.");
+        }
+
+        // Kiểm tra định dạng email nếu có nhập (khớp với CK_DOCTORS_email)
+        if (!email.isEmpty() && !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException(
+                    "Email không đúng định dạng (ví dụ: bacsi@petclinic.vn)!");
+        }
+
+        String statusText = cboStatus.getSelectedItem().toString();
+        String status;
+        switch (statusText) {
+            case "Nghỉ phép":
+                status = "OnLeave";
+                break;
+            case "Nghỉ việc":
+                status = "Inactive";
+                break;
+            default:
+                status = "Active";
+                break;
         }
 
         return new Doctor(

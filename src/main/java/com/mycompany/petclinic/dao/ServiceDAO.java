@@ -14,7 +14,7 @@ public class ServiceDAO {
         List<Service> list = new ArrayList<>();
 
         String sql = "SELECT serviceID, serviceName, description, "
-                   + "price, status FROM SERVICES "
+                   + "price, duration, status FROM SERVICES "
                    + "ORDER BY serviceID";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -31,7 +31,7 @@ public class ServiceDAO {
     // Tìm dịch vụ theo ID
     public Service findById(int id) throws SQLException {
         String sql = "SELECT serviceID, serviceName, description, "
-                   + "price, status FROM SERVICES WHERE serviceID = ?";
+                   + "price, duration, status FROM SERVICES WHERE serviceID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -50,8 +50,8 @@ public class ServiceDAO {
     // Thêm dịch vụ
     public int insert(Service service) throws SQLException {
         String sql = "INSERT INTO SERVICES "
-                   + "(serviceName, description, price, status) "
-                   + "VALUES (?, ?, ?, ?)";
+                   + "(serviceName, description, price, duration, status) "
+                   + "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(
@@ -73,14 +73,14 @@ public class ServiceDAO {
     public boolean update(Service service) throws SQLException {
         String sql = "UPDATE SERVICES SET "
                    + "serviceName = ?, description = ?, price = ?, "
-                   + "status = ? "
+                   + "duration = ?, status = ? "
                    + "WHERE serviceID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             setParameters(ps, service);
-            ps.setInt(5, service.getServiceId());
+            ps.setInt(6, service.getServiceId());
 
             return ps.executeUpdate() > 0;
         }
@@ -105,7 +105,7 @@ public class ServiceDAO {
         List<Service> list = new ArrayList<>();
 
         String sql = "SELECT serviceID, serviceName, description, "
-                   + "price, status FROM SERVICES "
+                   + "price, duration, status FROM SERVICES "
                    + "WHERE CAST(serviceID AS VARCHAR(20)) LIKE ? "
                    + "OR serviceName LIKE ? "
                    + "OR description LIKE ? "
@@ -129,24 +129,25 @@ public class ServiceDAO {
         return list;
     }
 
-    // Gán dữ liệu vào PreparedStatement (4 cột, không còn duration)
+    // Gán dữ liệu vào PreparedStatement (5 cột, bao gồm duration)
     private void setParameters(PreparedStatement ps, Service service)
             throws SQLException {
 
         ps.setString(1, service.getServiceName());
         ps.setString(2, service.getDescription());
         ps.setBigDecimal(3, service.getPrice());
-        ps.setString(4, service.getStatus());
+        ps.setInt(4, service.getDuration());
+        ps.setString(5, service.getStatus());
     }
 
-    // Chuyển ResultSet thành Service (database chưa có duration nên để 0)
+    // Chuyển ResultSet thành Service
     private Service mapService(ResultSet rs) throws SQLException {
         return new Service(
                 rs.getInt("serviceID"),
                 rs.getString("serviceName"),
                 rs.getString("description"),
                 rs.getBigDecimal("price"),
-                0,
+                rs.getInt("duration"),
                 rs.getString("status")
         );
     }

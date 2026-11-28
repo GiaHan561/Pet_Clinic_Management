@@ -40,14 +40,14 @@ VALUES
 (5, 8, '08:00', '12:00');
 
 
-INSERT INTO SERVICES (serviceName, description, price, status) 
+INSERT INTO SERVICES (serviceName, description, price, duration, status) 
 VALUES
-(N'Khám tổng quát', N'Khám sức khỏe tổng quát cho thú cưng',   150000, N'Active'),
-(N'Tắm và vệ sinh', N'Tắm, sấy, cắt tỉa móng, vệ sinh tai',    120000, N'Active'),
-(N'Xét nghiệm máu', N'Xét nghiệm công thức máu và sinh hóa',   350000, N'Active'),
-(N'Siêu âm tổng quát', N'Siêu âm chẩn đoán hình ảnh ổ bụng',  250000, N'Active'),
-(N'Triệt sản', N'Phẫu thuật triệt sản an toàn',                800000, N'Active'),
-(N'Cạo vôi răng', N'Vệ sinh và cạo vôi răng siêu âm',          300000, N'Active');
+(N'Khám tổng quát',    N'Khám sức khỏe tổng quát cho thú cưng',  150000, 30, N'Active'),
+(N'Tắm và vệ sinh',    N'Tắm, sấy, cắt tỉa móng, vệ sinh tai',   120000, 45, N'Active'),
+(N'Xét nghiệm máu',    N'Xét nghiệm công thức máu và sinh hóa',  350000, 20, N'Active'),
+(N'Siêu âm tổng quát', N'Siêu âm chẩn đoán hình ảnh ổ bụng', 250000, 30, N'Active'),
+(N'Triệt sản',         N'Phẫu thuật triệt sản an toàn',               800000, 90, N'Active'),
+(N'Cạo vôi răng',      N'Vệ sinh và cạo vôi răng siêu âm',         300000, 40, N'Active');
 
 
 INSERT INTO VACCINE (name, manufacturer, description, price, rcmInterval) 

@@ -118,11 +118,13 @@ CREATE TABLE SERVICES (
     serviceName NVARCHAR(100) NOT NULL,
     description NVARCHAR(500) NULL,
     price       DECIMAL(18,2) NOT NULL,
+    duration    INT           NOT NULL CONSTRAINT DF_SERVICES_duration DEFAULT 30,
     status      NVARCHAR(20)  NOT NULL CONSTRAINT DF_SERVICES_status DEFAULT N'Active',
-    CONSTRAINT CK_SERVICES_price  CHECK (price >= 0),
-    CONSTRAINT CK_SERVICES_status CHECK (status IN (N'Active', N'Inactive')),
-    CONSTRAINT CK_SERVICES_name CHECK (LEN(LTRIM(RTRIM(serviceName))) > 0),
-    CONSTRAINT UQ_SERVICES_name UNIQUE (serviceName)
+    CONSTRAINT CK_SERVICES_price    CHECK (price >= 0),
+    CONSTRAINT CK_SERVICES_duration CHECK (duration > 0),
+    CONSTRAINT CK_SERVICES_status   CHECK (status IN (N'Active', N'Inactive')),
+    CONSTRAINT CK_SERVICES_name     CHECK (LEN(LTRIM(RTRIM(serviceName))) > 0),
+    CONSTRAINT UQ_SERVICES_name     UNIQUE (serviceName)
 );
 GO
 

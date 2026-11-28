@@ -227,9 +227,16 @@ public class DoctorDAO {
         );
     }
 
+    // 9. Gán tham số cho DOCTORS (5 cột, không còn specialization)
     private void setDoctorParameters(
             PreparedStatement ps, Doctor doctor)
             throws SQLException {
+
+        if (doctor.getLicenseNumber() == null
+                || doctor.getLicenseNumber().trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Số giấy phép không được để trống!");
+        }
 
         ps.setString(1, doctor.getFullName().trim());
         ps.setString(2, doctor.getPhone().trim());
