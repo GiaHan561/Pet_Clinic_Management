@@ -3,6 +3,8 @@ package com.mycompany.petclinic.ui;
 
 
 import com.mycompany.petclinic.ui.customer.CustomerPanel;
+import com.mycompany.petclinic.ui.invoice.InvoicePanel;
+import com.mycompany.petclinic.ui.payment.PaymentPanel;
 import com.mycompany.petclinic.ui.pet.PetPanel;
 import com.mycompany.petclinic.ui.medical.MedicalRecordPanel;
 import com.mycompany.petclinic.ui.appointment.AppointmentManagementPanel;
@@ -78,6 +80,8 @@ public class MainFrame extends JFrame {
     private final Map<String, JPanel> panels = new HashMap<>();
 
     private final DashboardPanel dashboardPanel = new DashboardPanel();
+    private InvoicePanel invoicePanel;
+    private PaymentPanel paymentPanel;
 
     private String selectedKey;
 
@@ -118,6 +122,20 @@ public class MainFrame extends JFrame {
         }));
 
         registerPanel(KEY_PET, petPanel);
+
+        // Màn hình thanh toán
+        paymentPanel = new PaymentPanel();
+
+        // Màn hình hóa đơn:
+        // Khi nhấn "Thanh toán" trên một hóa đơn, mở màn hình thanh toán
+        // và truyền ID hóa đơn được chọn sang PaymentPanel.
+        invoicePanel = new InvoicePanel(invoiceId -> {
+            showPanel(KEY_PAYMENT);
+            paymentPanel.openForInvoice(invoiceId);
+        });
+
+        registerPanel(KEY_INVOICE, invoicePanel);
+        registerPanel(KEY_PAYMENT, paymentPanel);
 
         // Màn hình quản lý lịch hẹn
         registerPanel(
@@ -163,6 +181,9 @@ public class MainFrame extends JFrame {
 
         if (KEY_DASHBOARD.equals(key)) {
             dashboardPanel.loadData();
+        } else if (KEY_INVOICE.equals(key) && invoicePanel != null) {
+            // Tải lại danh sách hóa đơn để cập nhật trạng thái sau thanh toán
+            invoicePanel.refresh();
         }
     }
 
