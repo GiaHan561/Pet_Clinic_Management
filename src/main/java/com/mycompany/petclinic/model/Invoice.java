@@ -26,7 +26,7 @@ public class Invoice {
        this.status = STATUS_UNPAID;
     }
     // ?
-    public Invoice(int invoiceID, int vitsitID, BigDecimal discount, BigDecimal total, String status, int customerID, String customerName, String petName, BigDecimal paidAmount){
+    public Invoice(int invoiceID, int visitID, BigDecimal discount, BigDecimal total, String status, int customerID, String customerName, String petName, BigDecimal paidAmount){
         this.invoiceID = invoiceID;
         this.visitID = visitID;
         this.discount = discount;
