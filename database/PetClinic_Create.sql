@@ -158,6 +158,9 @@ CREATE TABLE MEDICAL_VISIT (
     doctorID      INT           NOT NULL,
     appointmentID INT           NULL,
     vaccinID      INT           NULL,
+    petID         INT           NOT NULL,                                   -- mới
+    visitTime     DATETIME2     NOT NULL
+                  CONSTRAINT DF_VISIT_time DEFAULT SYSDATETIME(),           -- mới
     reason        NVARCHAR(500) NULL,
     note          NVARCHAR(1000) NULL,
     status        NVARCHAR(20)  NOT NULL CONSTRAINT DF_VISIT_status DEFAULT N'InProgress',
@@ -173,6 +176,7 @@ CREATE TABLE VITAL_SIGN (
     vitalSignID     INT IDENTITY(1,1) CONSTRAINT PK_VITAL_SIGN PRIMARY KEY,
     visitID         INT           NOT NULL    UNIQUE,
     weight          DECIMAL(6,2)  NULL,
+    heartRate       INT           NULL,
     temperature     DECIMAL(4,1)  NULL,
     respiratoryRate INT           NULL,
     note            NVARCHAR(500) NULL,
@@ -185,6 +189,18 @@ CREATE TABLE VITAL_SIGN (
 );
 GO
 
+CREATE TABLE VACCINATION (
+    vaccinationID     INT IDENTITY(1,1) CONSTRAINT PK_VACCINATION PRIMARY KEY,
+    visitID           INT  NOT NULL CONSTRAINT FK_VACCINATION_VISIT
+                          FOREIGN KEY REFERENCES MEDICAL_VISIT(visitID),
+    vaccinID          INT  NOT NULL CONSTRAINT FK_VACCINATION_VACCINE
+                          FOREIGN KEY REFERENCES VACCINE(vaccinID),
+    injectionDate     DATE NOT NULL,
+    nextInjectionDate DATE NULL,
+    CONSTRAINT UQ_VACCINATION UNIQUE (visitID, vaccinID)
+);
+GO
+    
 CREATE TABLE DIAGNOSIS (
     diagnosisID   INT IDENTITY(1,1) CONSTRAINT PK_DIAGNOSIS PRIMARY KEY,
     visitID       INT           NOT NULL,
@@ -202,9 +218,11 @@ CREATE TABLE MEDICINE (
     name        NVARCHAR(100) NOT NULL,
     genericName NVARCHAR(100) NULL,
     description NVARCHAR(500) NULL,
+    dosage          NVARCHAR(100) NULL,   -- mới
     unit        NVARCHAR(30)  NULL,
     quantity    INT           NOT NULL CONSTRAINT DF_MEDICINE_qty DEFAULT 0,  -- tồn kho
     price       DECIMAL(18,2) NOT NULL,
+    manufactureDate DATE      NULL,       -- mới
     expiryDay   DATE          NULL,
     CONSTRAINT CK_MEDICINE_qty   CHECK (quantity >= 0),
     CONSTRAINT CK_MEDICINE_price CHECK (price >= 0),
@@ -291,7 +309,7 @@ CREATE INDEX IX_PETS_customerID       ON PETS(customerID);
 CREATE INDEX IX_APPOINTMENT_customer  ON APPOINTMENT(customerID, appointmentDate);
 CREATE INDEX IX_APPOINTMENT_doctor    ON APPOINTMENT(doctorID, appointmentDate);
 CREATE INDEX IX_VISIT_record          ON MEDICAL_VISIT(recordID);
-CREATE INDEX IX_INVOICE_customer      ON INVOICE(customerID);
+CREATE INDEX IX_VISIT_pet ON MEDICAL_VISIT(petID);
 CREATE INDEX IX_PAYMENT_invoice       ON PAYMENT(invoiceID);
 GO
 
