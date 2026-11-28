@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InvoiceDAO {
+
+    /**
+     * Chi phí phát sinh của một lần khám.
+     * Tổng chi phí = tiền dịch vụ + tiền vaccine + tiền thuốc.
+     */
     public static class Charges {
 
         private final BigDecimal serviceCost;
@@ -77,9 +82,11 @@ public class InvoiceDAO {
                 ISNULL((SELECT SUM(s.quantity * s.unitPrice)
                         FROM APPOINTMENT_SERVICE s
                         WHERE s.appointmentID = mv.appointmentID), 0) AS serviceCost,
-                ISNULL((SELECT v.price
-                        FROM VACCINE v
-                        WHERE v.vaccinID = mv.vaccinID), 0) AS vaccineCost,
+                ISNULL((SELECT SUM(v.price)
+                        FROM VACCINATION vc
+                        JOIN VACCINE v ON v.vaccinID = vc.vaccinID
+                        WHERE vc.visitID = mv.visitID
+                          AND vc.injectionDate <= CAST(GETDATE() AS DATE)), 0) AS vaccineCost,
                 ISNULL((SELECT SUM(d.quantity * d.unitPrice)
                         FROM PRESCRIPTION pr
                         JOIN PRESCRIPTION_DETAIL d
@@ -295,4 +302,3 @@ public class InvoiceDAO {
         );
     }
 }
-
