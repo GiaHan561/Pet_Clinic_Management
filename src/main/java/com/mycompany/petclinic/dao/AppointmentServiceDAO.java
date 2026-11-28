@@ -1,3 +1,4 @@
+
 package com.mycompany.petclinic.dao;
 
 import com.mycompany.petclinic.config.DatabaseConnection;
@@ -54,50 +55,21 @@ public class AppointmentServiceDAO {
         return list;
     }
 
-    // Lấy đơn giá hiện hành của dịch vụ từ bảng SERVICES (chỉ dịch vụ Active)
-    // Trả về null nếu dịch vụ không tồn tại hoặc đã ngừng cung cấp
-    public BigDecimal getServicePrice(int serviceID) {
-        String sql = """
-            SELECT price
-            FROM SERVICES
-            WHERE serviceID = ? AND status = N'Active'
-            """;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, serviceID);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getBigDecimal("price");
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     // Thêm dịch vụ vào lịch hẹn
-    // Đơn giá không do người dùng nhập mà tự lấy từ bảng SERVICES
-    public boolean insert(int appointmentID, int serviceID, int quantity) {
+    public boolean insert(AppointmentService item) {
         String sql = """
             INSERT INTO APPOINTMENT_SERVICE
                 (appointmentID, serviceID, quantity, unitPrice)
-            SELECT ?, serviceID, ?, price
-            FROM SERVICES
-            WHERE serviceID = ? AND status = N'Active'
+            VALUES (?, ?, ?, ?)
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, appointmentID);
-            ps.setInt(2, quantity);
-            ps.setInt(3, serviceID);
+            ps.setInt(1, item.getAppointmentID());
+            ps.setInt(2, item.getServiceID());
+            ps.setInt(3, item.getQuantity());
+            ps.setBigDecimal(4, item.getUnitPrice());
 
             return ps.executeUpdate() > 0;
 
